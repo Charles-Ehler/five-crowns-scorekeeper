@@ -32,34 +32,29 @@ export default function PlayerTotals({
           <li
             key={p.id}
             className={[
-              'flex items-center gap-3 rounded-2xl border p-3 transition-colors',
+              'nb-shadow-sm flex items-center gap-3 rounded-2xl border-[3px] p-3',
               isWinner
-                ? 'border-red-ink/50 bg-red-ink/5 shadow-sm dark:bg-red-ink/10'
+                ? 'border-ink bg-yellow dark:border-ink-dark'
                 : isLeader
-                  ? 'border-amber-chalk/50 bg-amber-chalk/10 dark:bg-amber-chalk/10'
-                  : 'border-paper-line bg-paper-raised dark:border-chalk-board-line dark:bg-chalk-board-raised',
+                  ? 'border-ink bg-green/30 dark:border-ink-dark'
+                  : 'border-ink bg-card dark:border-ink-dark dark:bg-card-dark',
             ].join(' ')}
           >
-            <span className="w-5 shrink-0 text-center text-sm font-semibold text-ink-faint dark:text-chalk-faint">
+            <span className="w-5 shrink-0 text-center text-sm font-extrabold text-muted dark:text-muted-dark">
               {i + 1}
             </span>
             <Avatar name={p.name} sizeClass="h-8 w-8 text-xs" />
-            <span className="min-w-0 flex-1 truncate font-medium text-ink dark:text-chalk">{p.name}</span>
+            <span className="min-w-0 flex-1 truncate font-bold text-ink dark:text-ink-dark">{p.name}</span>
             {dealer?.id === p.id && <DealerBadge iconOnly />}
             {highlighted && (
-              <span
-                className={[
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-bold',
-                  isWinner ? 'border-red-ink text-red-ink' : 'border-amber-chalk text-amber-chalk',
-                ].join(' ')}
-              >
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-card text-xs font-extrabold text-ink dark:border-ink-dark dark:bg-card-dark">
                 {isWinner ? '✓' : '●'}
               </span>
             )}
             <span className="flex flex-col items-end">
-              <span className="font-mono text-xl font-bold tabular-nums text-ink dark:text-chalk">{totals[p.id]}</span>
+              <span className="text-xl font-extrabold tabular-nums text-ink dark:text-ink-dark">{totals[p.id]}</span>
               {!highlighted && behindLeader > 0 && (
-                <span className="text-[11px] font-medium text-ink-faint dark:text-chalk-faint">
+                <span className="text-[11px] font-bold text-muted dark:text-muted-dark">
                   +{behindLeader} behind
                 </span>
               )}

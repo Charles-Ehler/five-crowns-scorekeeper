@@ -1,37 +1,31 @@
 import { NavLink } from 'react-router-dom';
-import { PlusCircle, Swords, History, Trophy } from 'lucide-react';
+import { Swords, History, Trophy } from 'lucide-react';
 
 const TABS = [
-  { to: '/', label: 'New Game', end: true, Icon: PlusCircle },
-  { to: '/game', label: 'Current', Icon: Swords },
+  { to: '/play', label: 'Play', Icon: Swords },
   { to: '/history', label: 'History', Icon: History },
   { to: '/stats', label: 'Stats', Icon: Trophy },
 ];
 
 export default function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-paper-line bg-paper/95 backdrop-blur dark:border-chalk-board-line dark:bg-chalk-board/95">
-      <div className="mx-auto flex max-w-md">
-        {TABS.map(({ to, label, end, Icon }) => (
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t-[3px] border-ink bg-cream dark:border-ink-dark dark:bg-canvas-dark">
+      <div className="mx-auto flex max-w-md gap-2 p-2">
+        {TABS.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
-            end={end}
             className={({ isActive }) =>
               [
-                'flex flex-1 flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors',
+                'nb-press-sm flex flex-1 flex-col items-center gap-0.5 rounded-xl border-2 py-2 text-xs font-bold transition-colors',
                 isActive
-                  ? 'text-red-ink dark:text-amber-chalk'
-                  : 'text-ink-faint hover:text-ink-soft dark:text-chalk-faint dark:hover:text-chalk-soft',
+                  ? 'nb-shadow-sm border-ink bg-yellow text-ink dark:border-ink-dark'
+                  : 'border-transparent text-muted dark:text-muted-dark',
               ].join(' ')
             }
           >
-            {({ isActive }) => (
-              <>
-                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                {label}
-              </>
-            )}
+            <Icon size={22} strokeWidth={2.5} />
+            {label}
           </NavLink>
         ))}
       </div>

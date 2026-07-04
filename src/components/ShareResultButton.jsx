@@ -34,7 +34,7 @@ export default function ShareResultButton({ game }) {
     <button
       type="button"
       onClick={handleShare}
-      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-paper-line py-3 font-medium text-ink transition-colors hover:bg-paper dark:border-chalk-board-line dark:text-chalk dark:hover:bg-chalk-board"
+      className="nb-press nb-shadow-sm flex w-full items-center justify-center gap-1.5 rounded-xl border-[3px] border-ink bg-card py-3 font-extrabold text-ink dark:border-ink-dark dark:bg-card-dark dark:text-ink-dark"
     >
       {status === 'idle' && (
         <>
@@ -44,13 +44,13 @@ export default function ShareResultButton({ game }) {
       )}
       {status === 'copied' && (
         <>
-          <Check size={16} className="text-forest dark:text-forest-chalk" />
+          <Check size={16} />
           Image copied!
         </>
       )}
       {status === 'downloaded' && (
         <>
-          <Download size={16} className="text-forest dark:text-forest-chalk" />
+          <Download size={16} />
           Image downloaded
         </>
       )}

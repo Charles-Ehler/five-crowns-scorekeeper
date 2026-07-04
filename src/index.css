@@ -5,30 +5,25 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Scorepad palette: cream ledger paper in light mode, a "flipped to the
-     chalkboard side" dark mode rather than a plain color inversion. */
-  --color-paper: #FBF7ED;
-  --color-paper-line: #E4DCC5;
-  --color-paper-raised: #FFFFFF;
-  --color-chalk-board: #1C1E22;
-  --color-chalk-board-line: #33373D;
-  --color-chalk-board-raised: #24262B;
+  /* Neubrutalism: flat blocks of color, thick borders, hard offset shadows.
+     No gradients, no blur, no soft shadows anywhere. */
+  --color-cream: #FFFCF2;
+  --color-canvas-dark: #18181D;
+  --color-card: #FFFFFF;
+  --color-card-dark: #232329;
+  --color-ink: #141414;
+  --color-ink-dark: #F5F1E8;
+  --color-muted: #6B6B6B;
+  --color-muted-dark: #A8A8B0;
 
-  --color-ink: #1D3557;
-  --color-ink-soft: #5C6B7A;
-  --color-ink-faint: #93A0AC;
-  --color-chalk: #F2EEE2;
-  --color-chalk-soft: #ABB4BC;
-  --color-chalk-faint: #6B7178;
+  --color-yellow: #FFD93D;
+  --color-red: #FF5C5C;
+  --color-blue: #4D96FF;
+  --color-green: #4CAF6D;
+  --color-purple: #B185DB;
 
-  --color-red-ink: #C1121F;
-  --color-amber-chalk: #E8A93C;
-  --color-forest: #3A5A40;
-  --color-forest-chalk: #8FBF97;
-
-  --font-display: "Kalam", cursive;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Lexend Mega", sans-serif;
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 html, body, #root {
@@ -39,26 +34,41 @@ body {
   margin: 0;
   overscroll-behavior-y: contain;
   font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Faint horizontal ledger rules across the whole page background. */
-.ruled-paper {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 35px,
-    var(--color-paper-line) 35px,
-    var(--color-paper-line) 36px
-  );
+button, a {
+  touch-action: manipulation;
 }
-.dark .ruled-paper {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 35px,
-    var(--color-chalk-board-line) 35px,
-    var(--color-chalk-board-line) 36px
-  );
+
+/* Hard offset "block" shadow — the signature neubrutalist card treatment.
+   Shadow color matches the border color per theme, not a soft drop shadow. */
+.nb-shadow {
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+.dark .nb-shadow {
+  box-shadow: 4px 4px 0 0 var(--color-ink-dark);
+}
+.nb-shadow-sm {
+  box-shadow: 2px 2px 0 0 var(--color-ink);
+}
+.dark .nb-shadow-sm {
+  box-shadow: 2px 2px 0 0 var(--color-ink-dark);
+}
+
+/* Mechanical press: on press, the element travels exactly the shadow's
+   offset and the shadow disappears, so it visually "lands" flush — the
+   tactile signature of this style, not just an opacity/scale tap effect. */
+.nb-press {
+  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+}
+.nb-press:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 transparent !important;
+}
+.nb-press-sm:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 transparent !important;
 }
 
 @keyframes page-in {
@@ -90,6 +100,18 @@ body {
 }
 .animate-pop-in {
   animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-sheet-in {
+  animation: sheet-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes confetti-fall {

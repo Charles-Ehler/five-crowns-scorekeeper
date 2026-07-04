@@ -14,14 +14,14 @@ export default function Avatar({ name, sizeClass, className = '' }) {
       <img
         src={photoUrl}
         alt={trimmed}
-        className={`shrink-0 rounded-full object-cover ring-2 ring-paper dark:ring-chalk-board ${sizeClass} ${className}`}
+        className={`shrink-0 rounded-full border-2 border-ink object-cover dark:border-ink-dark ${sizeClass} ${className}`}
       />
     );
   }
 
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-paper dark:text-chalk-board ${suit.bg} ${sizeClass} ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-full border-2 border-ink font-display text-ink dark:border-ink-dark ${suit.bg} ${sizeClass} ${className}`}
     >
       {trimmed ? trimmed.charAt(0).toUpperCase() : '?'}
     </span>

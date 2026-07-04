@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import Avatar from './Avatar.jsx';
+import NumberKeypadSheet from './NumberKeypadSheet.jsx';
 
 function initialEntries(players, initialData) {
   const entries = {};
@@ -24,7 +25,7 @@ export default function ScoreEntryForm({
   onDraftChange,
 }) {
   const [entries, setEntries] = useState(() => initialEntries(players, initialData));
-  const inputRefs = useRef({});
+  const [activeIndex, setActiveIndex] = useState(null);
 
   const someoneWentOut = players.some((p) => entries[p.id].wentOut);
   const scoresValid = players.every((p) => {
@@ -48,9 +49,8 @@ export default function ScoreEntryForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries]);
 
-  function updateScore(playerId, rawValue) {
-    const score = rawValue.replace(/[^0-9]/g, '');
-    setEntries((prev) => ({ ...prev, [playerId]: { ...prev[playerId], score } }));
+  function updateScore(playerId, nextValue) {
+    setEntries((prev) => ({ ...prev, [playerId]: { ...prev[playerId], score: nextValue } }));
   }
 
   // Going out is always a 0-point round, and it's a common mis-tap to leave a
@@ -73,21 +73,17 @@ export default function ScoreEntryForm({
     });
   }
 
-  function focusNextInput(index) {
-    for (let i = index + 1; i < players.length; i += 1) {
-      const nextPlayer = players[i];
-      if (entries[nextPlayer.id].wentOut) continue; // locked field, skip
-      inputRefs.current[nextPlayer.id]?.focus();
-      inputRefs.current[nextPlayer.id]?.select();
-      return;
+  // After tapping Done, jump straight to the next player who still needs a
+  // score — chains the whole table's entry into one fast pass instead of
+  // reopening the sheet per player.
+  function openNextKeypad(fromIndex) {
+    for (let i = fromIndex + 1; i < players.length; i += 1) {
+      if (!entries[players[i].id].wentOut) {
+        setActiveIndex(i);
+        return;
+      }
     }
-    inputRefs.current[players[index].id]?.blur();
-  }
-
-  function handleScoreKeyDown(e, index) {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    focusNextInput(index);
+    setActiveIndex(null);
   }
 
   function handleSubmit(e) {
@@ -104,56 +100,52 @@ export default function ScoreEntryForm({
     onSubmit(scoresByPlayerId);
   }
 
+  const activePlayer = activeIndex !== null ? players[activeIndex] : null;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-2.5">
       {players.map((p, i) => {
         const wentOut = entries[p.id].wentOut;
+        const score = entries[p.id].score;
         return (
           <div
             key={p.id}
-            className="flex min-h-[64px] items-center gap-3 rounded-2xl border border-paper-line bg-paper-raised p-3 shadow-sm dark:border-chalk-board-line dark:bg-chalk-board-raised"
+            className="nb-shadow-sm flex min-h-[64px] items-center gap-3 rounded-2xl border-[3px] border-ink bg-card p-3 dark:border-ink-dark dark:bg-card-dark"
           >
             <Avatar name={p.name} sizeClass="h-9 w-9 text-sm" />
-            <span className="min-w-0 flex-1 truncate font-medium text-ink dark:text-chalk">{p.name}</span>
+            <span className="min-w-0 flex-1 truncate font-bold text-ink dark:text-ink-dark">{p.name}</span>
             <button
               type="button"
               onClick={() => toggleWentOut(p.id)}
               className={[
-                'flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-2 text-xs font-semibold transition-colors',
+                'nb-press-sm flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-2 text-xs font-extrabold',
                 wentOut
-                  ? 'border-red-ink text-red-ink'
-                  : 'border-paper-line text-ink-faint dark:border-chalk-board-line dark:text-chalk-faint',
+                  ? 'border-ink bg-red text-ink dark:border-ink-dark'
+                  : 'border-ink text-muted dark:border-ink-dark dark:text-muted-dark',
               ].join(' ')}
             >
               {wentOut && <Check size={14} />}
               Went out
             </button>
-            <input
-              ref={(el) => {
-                inputRefs.current[p.id] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              enterKeyHint="next"
-              readOnly={wentOut}
-              value={entries[p.id].score}
-              onChange={(e) => updateScore(p.id, e.target.value)}
-              onKeyDown={(e) => handleScoreKeyDown(e, i)}
-              placeholder="0"
-              className={[
-                'w-16 shrink-0 rounded-xl border p-2.5 text-center font-mono text-2xl font-bold',
-                wentOut
-                  ? 'border-paper-line bg-paper text-ink-faint dark:border-chalk-board-line dark:bg-chalk-board dark:text-chalk-faint'
-                  : 'border-paper-line bg-paper-raised text-ink dark:border-chalk-board-line dark:bg-chalk-board-raised dark:text-chalk',
-              ].join(' ')}
-            />
+            {wentOut ? (
+              <span className="flex w-16 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink bg-cream py-2.5 text-center font-display text-xl text-muted dark:border-ink-dark dark:bg-canvas-dark dark:text-muted-dark">
+                0
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setActiveIndex(i)}
+                className="nb-press-sm nb-shadow-sm flex w-16 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink bg-yellow py-2.5 text-center font-display text-xl text-ink dark:border-ink-dark"
+              >
+                {score || '0'}
+              </button>
+            )}
           </div>
         );
       })}
 
       {!someoneWentOut && (
-        <p className="text-center text-xs font-medium text-red-ink">
+        <p className="text-center text-xs font-bold text-red">
           Mark who went out this round to continue.
         </p>
       )}
@@ -163,7 +155,7 @@ export default function ScoreEntryForm({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-xl border border-paper-line py-3 font-medium text-ink transition-colors hover:bg-paper dark:border-chalk-board-line dark:text-chalk dark:hover:bg-chalk-board"
+            className="nb-press flex-1 rounded-xl border-[3px] border-ink py-3 font-extrabold text-ink dark:border-ink-dark dark:text-ink-dark"
           >
             Cancel
           </button>
@@ -171,11 +163,21 @@ export default function ScoreEntryForm({
         <button
           type="submit"
           disabled={!allValid}
-          className="flex-1 rounded-xl bg-ink py-3 font-semibold text-paper shadow-sm transition active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 dark:bg-chalk dark:text-chalk-board"
+          className="nb-press nb-shadow flex-1 rounded-xl border-[3px] border-ink bg-green py-3 font-extrabold text-ink disabled:opacity-40 dark:border-ink-dark"
         >
           {submitLabel}
         </button>
       </div>
+
+      {activePlayer && (
+        <NumberKeypadSheet
+          open
+          playerName={activePlayer.name}
+          value={entries[activePlayer.id].score}
+          onChange={(next) => updateScore(activePlayer.id, next)}
+          onDone={() => openNextKeypad(activeIndex)}
+        />
+      )}
     </form>
   );
 }

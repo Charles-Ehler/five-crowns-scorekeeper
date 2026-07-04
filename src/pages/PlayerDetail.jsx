@@ -28,10 +28,11 @@ import { removePlayerPhoto, uploadPlayerPhoto } from '../lib/photos.js';
 import { computeStats, playerKey } from '../lib/stats.js';
 
 const ACCENT = {
-  red: { soft: 'bg-red-ink/10', text: 'text-red-ink' },
-  ink: { soft: 'bg-ink/10 dark:bg-chalk/15', text: 'text-ink dark:text-chalk' },
-  forest: { soft: 'bg-forest/10 dark:bg-forest-chalk/15', text: 'text-forest dark:text-forest-chalk' },
-  slate: { soft: 'bg-ink-faint/10 dark:bg-chalk-faint/15', text: 'text-ink-faint dark:text-chalk-faint' },
+  yellow: { bg: 'bg-yellow' },
+  red: { bg: 'bg-red' },
+  blue: { bg: 'bg-blue' },
+  green: { bg: 'bg-green' },
+  purple: { bg: 'bg-purple' },
 };
 
 function formatDate(timestamp) {
@@ -43,7 +44,7 @@ function GameContext({ gameId, createdAt, extra }) {
   return (
     <p className="flex items-center gap-1">
       {extra && <span>{extra}</span>}
-      <NavLink to={`/history/${gameId}`} className="font-medium text-red-ink">
+      <NavLink to={`/history/${gameId}`} className="font-extrabold text-ink underline decoration-blue decoration-[3px] dark:text-ink-dark">
         View game
       </NavLink>
       {formatDate(createdAt) && <span>· {formatDate(createdAt)}</span>}
@@ -110,11 +111,11 @@ export default function PlayerDetail() {
   }
 
   if (error) {
-    return <div className="p-4 text-red-ink">Couldn't load stats: {error}</div>;
+    return <div className="p-4 font-bold text-red">Couldn't load stats: {error}</div>;
   }
 
   if (stats === undefined) {
-    return <div className="p-4 text-ink-soft dark:text-chalk-soft">Loading…</div>;
+    return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
   }
 
   const player = stats.players.find((p) => playerKey(p.name) === playerKey(decodedName));
@@ -122,7 +123,7 @@ export default function PlayerDetail() {
   if (!player) {
     return (
       <div className="p-4">
-        <NavLink to="/stats" className="inline-flex items-center gap-1 text-sm font-medium text-red-ink">
+        <NavLink to="/stats" className="inline-flex items-center gap-1 text-sm font-extrabold text-ink dark:text-ink-dark">
           <ArrowLeft size={16} />
           Back to stats
         </NavLink>
@@ -136,7 +137,7 @@ export default function PlayerDetail() {
 
   return (
     <div className="space-y-6 p-4">
-      <NavLink to="/stats" className="inline-flex items-center gap-1 text-sm font-medium text-red-ink">
+      <NavLink to="/stats" className="inline-flex items-center gap-1 text-sm font-extrabold text-ink dark:text-ink-dark">
         <ArrowLeft size={16} />
         Back to stats
       </NavLink>
@@ -145,15 +146,15 @@ export default function PlayerDetail() {
         <div className="relative shrink-0">
           <Avatar name={player.name} sizeClass="h-16 w-16 text-2xl" />
           {photoBusy ? (
-            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
-              <Loader2 size={20} className="animate-spin text-white" />
+            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-ink/50">
+              <Loader2 size={20} className="animate-spin text-cream" />
             </span>
           ) : (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               aria-label={photoUrl ? 'Change photo' : 'Add photo'}
-              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-paper bg-red-ink text-paper shadow-sm dark:border-chalk-board"
+              className="nb-press-sm absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-ink bg-yellow text-ink dark:border-ink-dark"
             >
               <Camera size={13} />
             </button>
@@ -167,15 +168,15 @@ export default function PlayerDetail() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-display text-3xl text-ink dark:text-chalk">{player.name}</h1>
-          <p className="text-sm text-ink-soft dark:text-chalk-soft">
+          <h1 className="truncate font-display text-2xl text-ink dark:text-ink-dark">{player.name}</h1>
+          <p className="text-sm text-muted dark:text-muted-dark">
             {player.gamesPlayed} {player.gamesPlayed === 1 ? 'game' : 'games'} played
           </p>
           {photoUrl && !photoBusy && (
             <button
               type="button"
               onClick={handlePhotoRemove}
-              className="mt-1 flex items-center gap-1 text-xs font-medium text-ink-faint hover:text-red-ink dark:text-chalk-faint"
+              className="mt-1 flex items-center gap-1 text-xs font-bold text-muted dark:text-muted-dark"
             >
               <X size={12} />
               Remove photo
@@ -183,36 +184,36 @@ export default function PlayerDetail() {
           )}
         </div>
       </div>
-      {photoError && <p className="text-sm text-red-ink">{photoError}</p>}
+      {photoError && <p className="text-sm font-bold text-red">{photoError}</p>}
 
-      <div className="grid grid-cols-3 divide-x divide-paper-line rounded-2xl border border-paper-line bg-paper-raised shadow-sm dark:divide-chalk-board-line dark:border-chalk-board-line dark:bg-chalk-board-raised">
+      <div className="nb-shadow-sm grid grid-cols-3 divide-x-2 divide-ink rounded-2xl border-[3px] border-ink bg-card dark:divide-ink-dark dark:border-ink-dark dark:bg-card-dark">
         <div className="flex flex-col items-center gap-0.5 p-3">
-          <span className="flex items-center gap-1 font-mono text-2xl font-bold tabular-nums text-ink dark:text-chalk">
-            <Trophy size={16} className="text-amber-chalk" />
+          <span className="flex items-center gap-1 text-2xl font-extrabold tabular-nums text-ink dark:text-ink-dark">
+            <Trophy size={16} />
             {player.wins}
           </span>
-          <span className="text-[11px] uppercase tracking-wide text-ink-faint dark:text-chalk-faint">Wins</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-muted dark:text-muted-dark">Wins</span>
         </div>
         <div className="flex flex-col items-center gap-0.5 p-3">
-          <span className="font-mono text-2xl font-bold tabular-nums text-ink dark:text-chalk">{winRate}%</span>
-          <span className="text-[11px] uppercase tracking-wide text-ink-faint dark:text-chalk-faint">Win rate</span>
+          <span className="text-2xl font-extrabold tabular-nums text-ink dark:text-ink-dark">{winRate}%</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-muted dark:text-muted-dark">Win rate</span>
         </div>
         <div className="flex flex-col items-center gap-0.5 p-3">
-          <span className="font-mono text-2xl font-bold tabular-nums text-ink dark:text-chalk">{player.average.toFixed(1)}</span>
-          <span className="text-[11px] uppercase tracking-wide text-ink-faint dark:text-chalk-faint">Avg score</span>
+          <span className="text-2xl font-extrabold tabular-nums text-ink dark:text-ink-dark">{player.average.toFixed(1)}</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-muted dark:text-muted-dark">Avg score</span>
         </div>
       </div>
 
       {(player.currentStreak >= 2 || player.longestStreak >= 2) && (
         <div className="flex gap-2.5">
           {player.currentStreak >= 2 && (
-            <span className="flex items-center gap-1.5 rounded-full bg-amber-chalk/15 px-3 py-1.5 text-sm font-semibold text-amber-chalk">
+            <span className="flex items-center gap-1.5 rounded-full border-2 border-ink bg-yellow px-3 py-1.5 text-sm font-extrabold text-ink dark:border-ink-dark">
               <Zap size={14} />
               {player.currentStreak}-game streak
             </span>
           )}
           {player.longestStreak >= 2 && (
-            <span className="flex items-center gap-1.5 rounded-full bg-ink/8 px-3 py-1.5 text-sm font-medium text-ink-soft dark:bg-chalk/10 dark:text-chalk-soft">
+            <span className="flex items-center gap-1.5 rounded-full border-2 border-ink px-3 py-1.5 text-sm font-bold text-muted dark:border-ink-dark dark:text-muted-dark">
               Best: {player.longestStreak} wins
             </span>
           )}
@@ -220,15 +221,15 @@ export default function PlayerDetail() {
       )}
 
       {player.nemesis && (
-        <div className="rounded-2xl border border-red-ink/30 bg-red-ink/5 p-4 dark:bg-red-ink/10">
-          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-ink">
+        <div className="nb-shadow-sm rounded-2xl border-[3px] border-ink bg-red/20 p-4 dark:border-ink-dark">
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink dark:text-ink-dark">
             <Target size={14} />
             Nemesis
           </p>
-          <p className="text-lg font-bold text-ink dark:text-chalk">
+          <p className="text-lg font-extrabold text-ink dark:text-ink-dark">
             {player.nemesis.myWins}-{player.nemesis.theirWins}{' '}
-            <span className="font-normal text-ink-soft dark:text-chalk-soft">vs</span>{' '}
-            <NavLink to={`/stats/${encodeURIComponent(player.nemesis.name)}`} className="underline decoration-dotted">
+            <span className="font-normal text-muted dark:text-muted-dark">vs</span>{' '}
+            <NavLink to={`/stats/${encodeURIComponent(player.nemesis.name)}`} className="underline decoration-2 underline-offset-2">
               {player.nemesis.name}
             </NavLink>
           </p>
@@ -237,8 +238,8 @@ export default function PlayerDetail() {
 
       {pairs.length > 0 && (
         <section>
-          <h2 className="mb-3 flex items-center gap-2 font-display text-2xl text-ink dark:text-chalk">
-            <Swords size={18} className="text-red-ink" />
+          <h2 className="mb-3 flex items-center gap-2 font-display text-xl text-ink dark:text-ink-dark">
+            <Swords size={18} />
             Head-to-head
           </h2>
           <div className="space-y-2.5">
@@ -251,15 +252,15 @@ export default function PlayerDetail() {
 
       {(player.bestRound || player.worstRound || player.bestGame || player.worstGame) && (
         <section>
-          <h2 className="mb-3 flex items-center gap-2 font-display text-2xl text-ink dark:text-chalk">
-            <Trophy size={18} className="text-red-ink" />
+          <h2 className="mb-3 flex items-center gap-2 font-display text-xl text-ink dark:text-ink-dark">
+            <Trophy size={18} />
             Personal records
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {player.bestRound && (
               <StatCard
                 icon={Gem}
-                accent={ACCENT.forest}
+                accent={ACCENT.green}
                 label="Cleanest round"
                 value={player.bestRound.score}
                 context={
@@ -289,7 +290,7 @@ export default function PlayerDetail() {
             {player.bestGame && (
               <StatCard
                 icon={Medal}
-                accent={ACCENT.ink}
+                accent={ACCENT.yellow}
                 label="Best game"
                 value={player.bestGame.total}
                 context={<GameContext gameId={player.bestGame.gameId} createdAt={player.bestGame.createdAt} />}
@@ -298,7 +299,7 @@ export default function PlayerDetail() {
             {player.worstGame && (
               <StatCard
                 icon={CloudRain}
-                accent={ACCENT.slate}
+                accent={ACCENT.blue}
                 label="Worst game"
                 value={player.worstGame.total}
                 context={<GameContext gameId={player.worstGame.gameId} createdAt={player.worstGame.createdAt} />}
@@ -307,7 +308,7 @@ export default function PlayerDetail() {
             {player.improvement !== null && player.improvement > 0 && (
               <StatCard
                 icon={Sparkles}
-                accent={ACCENT.ink}
+                accent={ACCENT.purple}
                 label="Trending"
                 value={player.improvement.toFixed(1)}
                 unit="pts better"
@@ -317,7 +318,7 @@ export default function PlayerDetail() {
             {player.wentOutRate !== null && (
               <StatCard
                 icon={Flag}
-                accent={ACCENT.forest}
+                accent={ACCENT.green}
                 label="Goes out"
                 value={Math.round(player.wentOutRate * 100)}
                 unit="% of rounds"
@@ -328,32 +329,30 @@ export default function PlayerDetail() {
       )}
 
       <section>
-        <h2 className="mb-3 font-display text-2xl text-ink dark:text-chalk">Game history</h2>
+        <h2 className="mb-3 font-display text-xl text-ink dark:text-ink-dark">Game history</h2>
         <ul className="space-y-2">
           {player.history.map((g) => (
             <li key={g.gameId}>
               <NavLink
                 to={`/history/${g.gameId}`}
-                className="flex items-center justify-between rounded-2xl border border-paper-line bg-paper-raised p-3 shadow-sm transition-shadow hover:shadow-md dark:border-chalk-board-line dark:bg-chalk-board-raised"
+                className="nb-shadow-sm flex items-center justify-between rounded-2xl border-[3px] border-ink bg-card p-3 dark:border-ink-dark dark:bg-card-dark"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-ink dark:text-chalk">
+                  <p className="truncate text-sm font-bold text-ink dark:text-ink-dark">
                     vs {g.opponentNames.join(', ') || '—'}
                   </p>
-                  <p className="text-xs text-ink-faint dark:text-chalk-faint">{formatDate(g.createdAt)}</p>
+                  <p className="text-xs text-muted dark:text-muted-dark">{formatDate(g.createdAt)}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span
                     className={[
-                      'rounded-full px-2 py-0.5 text-xs font-semibold',
-                      g.won
-                        ? 'bg-amber-chalk/20 text-amber-chalk'
-                        : 'bg-ink/8 text-ink-soft dark:bg-chalk/10 dark:text-chalk-soft',
+                      'rounded-full border-2 border-ink px-2 py-0.5 text-xs font-extrabold dark:border-ink-dark',
+                      g.won ? 'bg-yellow text-ink' : 'text-muted dark:text-muted-dark',
                     ].join(' ')}
                   >
                     {g.won ? 'Won' : `#${g.placement}`}
                   </span>
-                  <span className="font-mono text-lg font-bold tabular-nums text-ink dark:text-chalk">{g.total}</span>
+                  <span className="text-lg font-extrabold tabular-nums text-ink dark:text-ink-dark">{g.total}</span>
                 </div>
               </NavLink>
             </li>

@@ -30,11 +30,11 @@ export default function History() {
   }
 
   if (error) {
-    return <div className="p-4 text-red-ink">Couldn't load history: {error}</div>;
+    return <div className="p-4 font-bold text-red">Couldn't load history: {error}</div>;
   }
 
   if (games === undefined) {
-    return <div className="p-4 text-ink-soft dark:text-chalk-soft">Loading…</div>;
+    return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
   }
 
   if (games.length === 0) {
@@ -43,7 +43,7 @@ export default function History() {
 
   return (
     <div className="space-y-3 p-4">
-      <h1 className="font-display text-3xl text-ink dark:text-chalk">History</h1>
+      <h1 className="font-display text-2xl text-ink dark:text-ink-dark">History</h1>
       {games.map((game) => {
         const totals = computeTotals(game.players, game.rounds);
         const winners = game.players.filter((p) => game.winnerIds?.includes(p.id));
@@ -52,7 +52,7 @@ export default function History() {
         return (
           <div
             key={game.id}
-            className="flex items-center gap-2 rounded-2xl border border-paper-line bg-paper-raised p-3 shadow-sm dark:border-chalk-board-line dark:bg-chalk-board-raised"
+            className="nb-shadow-sm flex items-center gap-2 rounded-2xl border-[3px] border-ink bg-card p-3 dark:border-ink-dark dark:bg-card-dark"
           >
             <NavLink to={`/history/${game.id}`} className="min-w-0 flex-1">
               <div className="mb-1 flex -space-x-2">
@@ -61,13 +61,12 @@ export default function History() {
                     key={p.id}
                     name={p.name}
                     sizeClass="h-6 w-6 text-[10px]"
-                    className="border-2 border-paper-raised dark:border-chalk-board-raised"
                   />
                 ))}
               </div>
-              <p className="truncate font-semibold text-ink dark:text-chalk">{game.players.map((p) => p.name).join(', ')}</p>
-              <p className="flex items-center gap-1 text-xs text-ink-soft dark:text-chalk-soft">
-                {isComplete ? <Trophy size={12} className="text-amber-chalk" /> : <Clock3 size={12} />}
+              <p className="truncate font-bold text-ink dark:text-ink-dark">{game.players.map((p) => p.name).join(', ')}</p>
+              <p className="flex items-center gap-1 text-xs text-muted dark:text-muted-dark">
+                {isComplete ? <Trophy size={12} className="text-ink dark:text-ink-dark" /> : <Clock3 size={12} />}
                 {formatDate(game.createdAt)} · {isComplete ? `Winner: ${winnerSummary}` : 'In progress'}
               </p>
             </NavLink>
@@ -75,7 +74,7 @@ export default function History() {
               type="button"
               onClick={() => setDeletingId(game.id)}
               aria-label="Delete game"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-paper-line text-red-ink transition-colors hover:bg-red-ink/10 dark:border-chalk-board-line"
+              className="nb-press-sm flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
             >
               <Trash2 size={16} />
             </button>

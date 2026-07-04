@@ -23,7 +23,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
-      <div className="px-4 py-3 text-center text-sm font-semibold text-paper">Adjust photo</div>
+      <div className="px-4 py-3 text-center text-sm font-extrabold text-cream">Adjust photo</div>
 
       <div className="relative flex-1 overflow-hidden">
         <Cropper
@@ -40,7 +40,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
       </div>
 
       <div className="space-y-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="flex items-center gap-3 text-paper">
+        <div className="flex items-center gap-3 text-cream">
           <ZoomOut size={16} className="shrink-0" />
           <input
             type="range"
@@ -49,7 +49,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             step={0.01}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="flex-1 accent-red-ink"
+            className="flex-1 accent-yellow"
             aria-label="Zoom"
           />
           <ZoomIn size={16} className="shrink-0" />
@@ -59,7 +59,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="flex-1 rounded-xl border border-white/30 py-3 font-medium text-paper transition-colors hover:bg-white/10 disabled:opacity-40"
+            className="flex-1 rounded-xl border-[3px] border-cream py-3 font-extrabold text-cream transition-transform active:scale-95 disabled:opacity-40"
           >
             Cancel
           </button>
@@ -67,7 +67,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             type="button"
             onClick={handleConfirm}
             disabled={!croppedAreaPixels || saving}
-            className="flex-1 rounded-xl bg-red-ink py-3 font-semibold text-paper shadow-sm transition active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100"
+            className="flex-1 rounded-xl border-[3px] border-cream bg-yellow py-3 font-extrabold text-ink transition-transform active:scale-95 disabled:opacity-40"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>

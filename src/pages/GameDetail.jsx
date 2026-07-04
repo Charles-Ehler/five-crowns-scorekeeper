@@ -17,18 +17,18 @@ export default function GameDetail() {
   }, [gameId]);
 
   if (error) {
-    return <div className="p-4 text-red-ink">Couldn't load this game: {error}</div>;
+    return <div className="p-4 font-bold text-red">Couldn't load this game: {error}</div>;
   }
 
   if (game === undefined) {
-    return <div className="p-4 text-ink-soft dark:text-chalk-soft">Loading…</div>;
+    return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
   }
 
   if (game === null) {
     return (
       <div className="p-4 text-center">
-        <p className="mt-8 text-ink-soft dark:text-chalk-soft">This game no longer exists.</p>
-        <NavLink to="/history" className="mt-3 inline-block font-medium text-red-ink">
+        <p className="mt-8 text-muted dark:text-muted-dark">This game no longer exists.</p>
+        <NavLink to="/history" className="mt-3 inline-block font-extrabold text-ink underline decoration-red decoration-[3px] dark:text-ink-dark">
           ← Back to history
         </NavLink>
       </div>
@@ -39,12 +39,12 @@ export default function GameDetail() {
 
   return (
     <div className="space-y-4 p-4">
-      <NavLink to="/history" className="inline-flex items-center gap-1 text-sm font-medium text-red-ink">
+      <NavLink to="/history" className="inline-flex items-center gap-1 text-sm font-extrabold text-ink dark:text-ink-dark">
         <ArrowLeft size={16} />
         Back to history
       </NavLink>
-      <h1 className="flex items-center gap-2 font-display text-2xl text-ink dark:text-chalk">
-        {isComplete && <Trophy size={20} className="text-amber-chalk" />}
+      <h1 className="flex items-center gap-2 font-display text-xl text-ink dark:text-ink-dark">
+        {isComplete && <Trophy size={20} className="text-ink dark:text-ink-dark" />}
         {isComplete ? 'Final standings' : `In progress · round ${game.currentRound}`}
       </h1>
       <PlayerTotals

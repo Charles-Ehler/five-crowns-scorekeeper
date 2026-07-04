@@ -1,8 +1,7 @@
-import { useLocation, Route, Routes } from 'react-router-dom';
+import { Navigate, useLocation, Route, Routes } from 'react-router-dom';
 import { Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import BottomNav from './components/BottomNav.jsx';
-import NewGame from './pages/NewGame.jsx';
-import CurrentGame from './pages/CurrentGame.jsx';
+import Play from './pages/Play.jsx';
 import History from './pages/History.jsx';
 import GameDetail from './pages/GameDetail.jsx';
 import Stats from './pages/Stats.jsx';
@@ -18,11 +17,11 @@ export default function App() {
 
   return (
     <PlayerPhotosProvider>
-      <div className="ruled-paper flex min-h-screen flex-col bg-paper dark:bg-chalk-board">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b-2 border-red-ink/40 bg-paper/90 px-4 py-3 backdrop-blur dark:bg-chalk-board/90">
-          <h1 className="flex items-baseline gap-1.5 font-display text-xl text-ink dark:text-chalk">
+      <div className="flex min-h-screen flex-col bg-cream dark:bg-canvas-dark">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b-[3px] border-ink bg-cream px-4 py-3 dark:border-ink-dark dark:bg-canvas-dark">
+          <h1 className="flex items-baseline gap-1.5 font-display text-lg text-ink dark:text-ink-dark">
             Five Crowns
-            <span className="font-sans text-xs font-normal text-ink-faint dark:text-chalk-faint">v{__APP_VERSION__}</span>
+            <span className="font-sans text-xs font-normal text-muted dark:text-muted-dark">v{__APP_VERSION__}</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -30,7 +29,7 @@ export default function App() {
               onClick={toggleFeedback}
               aria-label="Toggle sound and vibration"
               title="Sound & haptics (off by default)"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-paper-line text-ink-soft transition-colors hover:bg-paper-raised dark:border-chalk-board-line dark:text-chalk-soft dark:hover:bg-chalk-board-raised"
+              className="nb-press-sm flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
             >
               {feedbackEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </button>
@@ -38,19 +37,20 @@ export default function App() {
               type="button"
               onClick={toggleTheme}
               aria-label="Toggle dark mode"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-paper-line text-ink-soft transition-colors hover:bg-paper-raised dark:border-chalk-board-line dark:text-chalk-soft dark:hover:bg-chalk-board-raised"
+              className="nb-press-sm flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto pb-20">
+        <main className="flex-1 overflow-y-auto pb-24">
           <div key={location.pathname} className="animate-page-in">
             <Routes location={location}>
-              <Route path="/" element={<NewGame />} />
-              <Route path="/game" element={<CurrentGame />} />
-              <Route path="/game/:gameId" element={<CurrentGame />} />
+              <Route path="/" element={<Navigate to="/play" replace />} />
+              <Route path="/play" element={<Play />} />
+              <Route path="/play/new" element={<Play forceNew />} />
+              <Route path="/play/:gameId" element={<Play />} />
               <Route path="/history" element={<History />} />
               <Route path="/history/:gameId" element={<GameDetail />} />
               <Route path="/stats" element={<Stats />} />

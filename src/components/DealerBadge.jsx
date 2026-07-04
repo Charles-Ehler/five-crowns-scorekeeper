@@ -8,15 +8,15 @@ export default function DealerBadge({ iconOnly = false }) {
       <span
         title="Dealer"
         aria-label="Dealer"
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink/10 dark:bg-chalk/15"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-blue dark:border-ink-dark"
       >
-        <Shuffle size={11} className="text-ink dark:text-chalk" />
+        <Shuffle size={11} className="text-ink" />
       </span>
     );
   }
 
   return (
-    <span className="flex shrink-0 items-center gap-1 rounded-full bg-ink/10 px-2 py-1 text-[11px] font-semibold text-ink dark:bg-chalk/15 dark:text-chalk">
+    <span className="flex shrink-0 items-center gap-1 rounded-full border-2 border-ink bg-blue px-2 py-1 text-[11px] font-extrabold text-ink dark:border-ink-dark">
       <Shuffle size={12} />
       Dealer
     </span>

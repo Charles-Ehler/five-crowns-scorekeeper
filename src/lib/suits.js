@@ -1,12 +1,14 @@
 // Five Crowns' five suits, used purely as a decorative accent system
-// (player badges, headers, icons) — never tied to actual game logic.
-// Colors pulled from the Scorepad palette: ink, red pen, forest, mustard, plum.
+// (player badges, avatars, chips) — never tied to actual game logic.
+// Neubrutalism reads as solid color blocks, not colored text — every suit
+// pairs its fill with black ink text/borders, never a tinted text color,
+// so contrast stays consistent across all five without per-color tuning.
 export const SUITS = [
-  { key: 'ink', symbol: '♠', text: 'text-[#1D3557] dark:text-[#AEC3D8]', bg: 'bg-[#1D3557]', soft: 'bg-[#1D3557]/8 dark:bg-[#1D3557]/30', ring: 'ring-[#1D3557]/40' },
-  { key: 'red-pen', symbol: '♥', text: 'text-[#C1121F] dark:text-[#F08A93]', bg: 'bg-[#C1121F]', soft: 'bg-[#C1121F]/8 dark:bg-[#C1121F]/25', ring: 'ring-[#C1121F]/40' },
-  { key: 'forest', symbol: '♣', text: 'text-[#3A5A40] dark:text-[#9CC0A3]', bg: 'bg-[#3A5A40]', soft: 'bg-[#3A5A40]/8 dark:bg-[#3A5A40]/30', ring: 'ring-[#3A5A40]/40' },
-  { key: 'mustard', symbol: '♦', text: 'text-[#B08900] dark:text-[#E8C15C]', bg: 'bg-[#B08900]', soft: 'bg-[#B08900]/8 dark:bg-[#B08900]/25', ring: 'ring-[#B08900]/40' },
-  { key: 'plum', symbol: '★', text: 'text-[#6D4C6E] dark:text-[#C7A9C8]', bg: 'bg-[#6D4C6E]', soft: 'bg-[#6D4C6E]/8 dark:bg-[#6D4C6E]/30', ring: 'ring-[#6D4C6E]/40' },
+  { key: 'yellow', bg: 'bg-yellow' },
+  { key: 'red', bg: 'bg-red' },
+  { key: 'blue', bg: 'bg-blue' },
+  { key: 'green', bg: 'bg-green' },
+  { key: 'purple', bg: 'bg-purple' },
 ];
 
 export function suitForIndex(index) {
