@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* Dark mode is toggled by adding/removing the `dark` class on <html>,
+   rather than relying purely on prefers-color-scheme, so the in-app toggle works. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Scorepad palette: cream ledger paper in light mode, a "flipped to the
+     chalkboard side" dark mode rather than a plain color inversion. */
+  --color-paper: #FBF7ED;
+  --color-paper-line: #E4DCC5;
+  --color-paper-raised: #FFFFFF;
+  --color-chalk-board: #1C1E22;
+  --color-chalk-board-line: #33373D;
+  --color-chalk-board-raised: #24262B;
+
+  --color-ink: #1D3557;
+  --color-ink-soft: #5C6B7A;
+  --color-ink-faint: #93A0AC;
+  --color-chalk: #F2EEE2;
+  --color-chalk-soft: #ABB4BC;
+  --color-chalk-faint: #6B7178;
+
+  --color-red-ink: #C1121F;
+  --color-amber-chalk: #E8A93C;
+  --color-forest: #3A5A40;
+  --color-forest-chalk: #8FBF97;
+
+  --font-display: "Kalam", cursive;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overscroll-behavior-y: contain;
+  font-family: var(--font-sans);
+}
+
+/* Faint horizontal ledger rules across the whole page background. */
+.ruled-paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 35px,
+    var(--color-paper-line) 35px,
+    var(--color-paper-line) 36px
+  );
+}
+.dark .ruled-paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 35px,
+    var(--color-chalk-board-line) 35px,
+    var(--color-chalk-board-line) 36px
+  );
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-page-in {
+  animation: page-in 220ms ease-out;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-pop-in {
+  animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(220px) rotate(340deg);
+    opacity: 0;
+  }
+}
+.animate-confetti {
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
