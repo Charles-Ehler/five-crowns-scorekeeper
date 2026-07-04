@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId } from './fiveCrowns.js';
+import { CURRENT_GAME_KEY } from './storageKeys.js';
 
 const GAMES_COLLECTION = 'fiveCrowns_games';
 const PLAYERS_COLLECTION = 'fiveCrowns_players';
@@ -103,6 +104,11 @@ function buildRoundsUpdate(game, rounds) {
 
 export async function deleteGame(gameId) {
   await deleteDoc(doc(db, GAMES_COLLECTION, gameId));
+  // Otherwise this device's Play tab would keep trying to reload a game that
+  // no longer exists, landing on a dead end instead of the New Game screen.
+  if (localStorage.getItem(CURRENT_GAME_KEY) === gameId) {
+    localStorage.removeItem(CURRENT_GAME_KEY);
+  }
 }
 
 export async function listGames() {

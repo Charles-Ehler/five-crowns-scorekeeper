@@ -235,6 +235,15 @@ function LiveGame({ gameId }) {
     return unsubscribe;
   }, [gameId]);
 
+  // Someone else may have deleted this game from another device — without
+  // this, the Play tab would keep bouncing back to a dead game every time
+  // it's opened, since the "current game" pointer never gets cleared.
+  useEffect(() => {
+    if (game === null && localStorage.getItem(CURRENT_GAME_KEY) === gameId) {
+      localStorage.removeItem(CURRENT_GAME_KEY);
+    }
+  }, [game, gameId]);
+
   if (error) {
     return <div className="p-4 font-bold text-heart">Couldn't load this game: {error}</div>;
   }
