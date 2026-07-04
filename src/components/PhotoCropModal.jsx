@@ -49,7 +49,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             step={0.01}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="flex-1 accent-yellow"
+            className="flex-1 accent-gold"
             aria-label="Zoom"
           />
           <ZoomIn size={16} className="shrink-0" />
@@ -59,7 +59,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="flex-1 rounded-xl border-[3px] border-cream py-3 font-extrabold text-cream transition-transform active:scale-95 disabled:opacity-40"
+            className="flex-1 rounded-xl border-2 border-cream py-3 font-bold text-cream transition-transform active:scale-95 disabled:opacity-40"
           >
             Cancel
           </button>
@@ -67,7 +67,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             type="button"
             onClick={handleConfirm}
             disabled={!croppedAreaPixels || saving}
-            className="flex-1 rounded-xl border-[3px] border-cream bg-yellow py-3 font-extrabold text-ink transition-transform active:scale-95 disabled:opacity-40"
+            className="flex-1 rounded-xl bg-gold py-3 font-bold text-ink transition-transform active:scale-95 disabled:opacity-40"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>

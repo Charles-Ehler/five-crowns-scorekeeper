@@ -111,18 +111,18 @@ export default function ScoreEntryForm({
         return (
           <div
             key={p.id}
-            className="nb-shadow-sm flex min-h-[64px] items-center gap-3 rounded-2xl border-[3px] border-ink bg-card p-3 dark:border-ink-dark dark:bg-card-dark"
+            className="card-elevated flex min-h-[64px] items-center gap-3 rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel"
           >
             <Avatar name={p.name} sizeClass="h-9 w-9 text-sm" />
-            <span className="min-w-0 flex-1 truncate font-bold text-ink dark:text-ink-dark">{p.name}</span>
+            <span className="min-w-0 flex-1 truncate font-bold text-ink dark:text-cream">{p.name}</span>
             <button
               type="button"
               onClick={() => toggleWentOut(p.id)}
               className={[
-                'nb-press-sm flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-2 text-xs font-extrabold',
+                'press flex shrink-0 items-center gap-1 rounded-full px-3 py-2 text-xs font-bold',
                 wentOut
-                  ? 'border-ink bg-red text-ink dark:border-ink-dark'
-                  : 'border-ink text-muted dark:border-ink-dark dark:text-muted-dark',
+                  ? 'bg-heart text-cream'
+                  : 'bg-muted/10 text-muted dark:bg-muted-dark/10 dark:text-muted-dark',
               ].join(' ')}
             >
               {wentOut && <Check size={14} />}
@@ -142,10 +142,10 @@ export default function ScoreEntryForm({
               onKeyDown={(e) => handleScoreKeyDown(e, i)}
               placeholder="0"
               className={[
-                'w-16 shrink-0 rounded-xl border-[3px] border-ink py-2.5 text-center font-display text-xl focus:outline-none dark:border-ink-dark',
+                'w-16 shrink-0 rounded-xl border-2 py-2.5 text-center font-display text-xl focus:outline-none',
                 wentOut
-                  ? 'bg-cream text-muted dark:bg-canvas-dark dark:text-muted-dark'
-                  : 'nb-shadow-sm bg-yellow text-ink',
+                  ? 'border-parchment-line bg-parchment text-muted dark:border-ink-line dark:bg-ink-deep dark:text-muted-dark'
+                  : 'border-gold/40 bg-gold/10 text-ink focus:border-gold dark:text-cream',
               ].join(' ')}
             />
           </div>
@@ -153,7 +153,7 @@ export default function ScoreEntryForm({
       })}
 
       {!someoneWentOut && (
-        <p className="text-center text-xs font-bold text-red">
+        <p className="text-center text-xs font-bold text-heart">
           Mark who went out this round to continue.
         </p>
       )}
@@ -163,7 +163,7 @@ export default function ScoreEntryForm({
           <button
             type="button"
             onClick={onCancel}
-            className="nb-press flex-1 rounded-xl border-[3px] border-ink py-3 font-extrabold text-ink dark:border-ink-dark dark:text-ink-dark"
+            className="press flex-1 rounded-xl border border-parchment-line py-3 font-semibold text-ink dark:border-ink-line dark:text-cream"
           >
             Cancel
           </button>
@@ -171,7 +171,7 @@ export default function ScoreEntryForm({
         <button
           type="submit"
           disabled={!allValid}
-          className="nb-press nb-shadow flex-1 rounded-xl border-[3px] border-ink bg-green py-3 font-extrabold text-ink disabled:opacity-40 dark:border-ink-dark"
+          className="press flex-1 rounded-xl bg-gold py-3 font-bold text-ink disabled:opacity-40"
         >
           {submitLabel}
         </button>

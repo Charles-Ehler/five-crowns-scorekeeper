@@ -9,22 +9,20 @@ const TABS = [
 
 export default function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t-[3px] border-ink bg-cream dark:border-ink-dark dark:bg-canvas-dark">
-      <div className="mx-auto flex max-w-md gap-2 p-2">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-parchment-line bg-parchment-panel/95 backdrop-blur dark:border-ink-line dark:bg-ink-panel/95">
+      <div className="mx-auto flex max-w-md gap-1 p-2">
         {TABS.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               [
-                'nb-press-sm flex flex-1 flex-col items-center gap-0.5 rounded-xl border-2 py-2 text-xs font-bold transition-colors',
-                isActive
-                  ? 'nb-shadow-sm border-ink bg-yellow text-ink dark:border-ink-dark'
-                  : 'border-transparent text-muted dark:text-muted-dark',
+                'press flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 text-xs font-semibold',
+                isActive ? 'bg-gold/15 text-gold-deep dark:text-gold' : 'text-muted dark:text-muted-dark',
               ].join(' ')
             }
           >
-            <Icon size={22} strokeWidth={2.5} />
+            <Icon size={22} strokeWidth={2.2} />
             {label}
           </NavLink>
         ))}

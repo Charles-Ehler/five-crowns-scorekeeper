@@ -5,6 +5,7 @@ import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
+import RoundCornerCard from '../components/RoundCornerCard.jsx';
 import ScoreEntryForm from '../components/ScoreEntryForm.jsx';
 import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import ShareResultButton from '../components/ShareResultButton.jsx';
@@ -113,8 +114,8 @@ function NewGameForm() {
   return (
     <div className="space-y-5 p-4">
       <div>
-        <h1 className="flex items-center gap-2 font-display text-2xl text-ink dark:text-ink-dark">
-          <Sparkles className="text-red" size={22} />
+        <h1 className="flex items-center gap-2 font-display text-2xl text-ink dark:text-cream">
+          <Sparkles className="text-gold" size={20} />
           New Game
         </h1>
         <p className="mt-1 text-sm text-muted dark:text-muted-dark">Add 2-7 players to get started.</p>
@@ -128,7 +129,7 @@ function NewGameForm() {
                 <Avatar name={name} sizeClass="h-11 w-11 text-sm" />
               ) : (
                 <span
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-ink font-display text-ink dark:border-ink-dark ${suitForIndex(i).bg}`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-cream ${suitForIndex(i).bg}`}
                 >
                   {i + 1}
                 </span>
@@ -138,14 +139,14 @@ function NewGameForm() {
                 value={name}
                 onChange={(e) => updateName(i, e.target.value)}
                 placeholder={`Player ${i + 1}`}
-                className="min-w-0 flex-1 rounded-2xl border-[3px] border-ink bg-card p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:border-ink-dark dark:bg-card-dark dark:text-ink-dark"
+                className="card-elevated min-w-0 flex-1 rounded-2xl bg-parchment-panel p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-panel dark:text-cream"
               />
               <button
                 type="button"
                 onClick={() => moveUp(i)}
                 disabled={i === 0}
                 aria-label="Move up"
-                className="nb-press-sm flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink text-ink disabled:opacity-30 dark:border-ink-dark dark:text-ink-dark"
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-ink disabled:opacity-30 dark:bg-ink-panel dark:text-cream"
               >
                 <ChevronUp size={18} />
               </button>
@@ -154,7 +155,7 @@ function NewGameForm() {
                 onClick={() => moveDown(i)}
                 disabled={i === names.length - 1}
                 aria-label="Move down"
-                className="nb-press-sm flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink text-ink disabled:opacity-30 dark:border-ink-dark dark:text-ink-dark"
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-ink disabled:opacity-30 dark:bg-ink-panel dark:text-cream"
               >
                 <ChevronDown size={18} />
               </button>
@@ -163,7 +164,7 @@ function NewGameForm() {
                 onClick={() => removePlayer(i)}
                 disabled={names.length <= MIN_PLAYERS}
                 aria-label="Remove player"
-                className="nb-press-sm flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink bg-red text-ink disabled:opacity-30 dark:border-ink-dark"
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-heart text-cream disabled:opacity-30"
               >
                 <X size={18} />
               </button>
@@ -176,7 +177,7 @@ function NewGameForm() {
         type="button"
         onClick={() => addPlayer()}
         disabled={names.length >= MAX_PLAYERS}
-        className="nb-press flex w-full items-center justify-center gap-1.5 rounded-2xl border-[3px] border-dashed border-ink py-3 font-extrabold text-ink disabled:opacity-30 dark:border-ink-dark dark:text-ink-dark"
+        className="press flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-3 font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
       >
         <Plus size={18} />
         Add player
@@ -184,14 +185,14 @@ function NewGameForm() {
 
       {availableRecent.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">Recent players</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Recent players</p>
           <div className="flex flex-wrap gap-2">
             {availableRecent.map((r) => (
               <button
                 key={r.name}
                 type="button"
                 onClick={() => addRecent(r.name)}
-                className="nb-press-sm rounded-full border-2 border-ink bg-card px-3 py-1.5 text-left text-sm font-bold text-ink dark:border-ink-dark dark:bg-card-dark dark:text-ink-dark"
+                className="card-elevated press rounded-full bg-parchment-panel px-3 py-1.5 text-left text-sm font-bold text-ink dark:bg-ink-panel dark:text-cream"
               >
                 {r.name}
                 {r.lastUsedAt && (
@@ -203,13 +204,13 @@ function NewGameForm() {
         </div>
       )}
 
-      {error && <p className="text-sm font-bold text-red">{error}</p>}
+      {error && <p className="text-sm font-bold text-heart">{error}</p>}
 
       <button
         type="button"
         onClick={handleStart}
         disabled={!canStart || starting}
-        className="nb-press nb-shadow w-full rounded-2xl border-[3px] border-ink bg-yellow py-3.5 font-display text-lg text-ink disabled:opacity-40 dark:border-ink-dark"
+        className="press w-full rounded-2xl bg-gold py-3.5 font-display text-lg text-ink shadow-lg shadow-gold/20 disabled:opacity-40"
       >
         {starting ? 'Starting…' : 'Start Game'}
       </button>
@@ -235,7 +236,7 @@ function LiveGame({ gameId }) {
   }, [gameId]);
 
   if (error) {
-    return <div className="p-4 font-bold text-red">Couldn't load this game: {error}</div>;
+    return <div className="p-4 font-bold text-heart">Couldn't load this game: {error}</div>;
   }
 
   if (game === undefined) {
@@ -246,7 +247,7 @@ function LiveGame({ gameId }) {
     return (
       <div className="p-4 text-center">
         <p className="mt-8 text-muted dark:text-muted-dark">This game no longer exists.</p>
-        <NavLink to="/play/new" className="mt-3 inline-block font-extrabold text-ink underline decoration-red decoration-[3px] dark:text-ink-dark">
+        <NavLink to="/play/new" className="mt-3 inline-block font-bold text-gold-deep dark:text-gold">
           Start a new game →
         </NavLink>
       </div>
@@ -280,27 +281,25 @@ function LiveGame({ gameId }) {
 
   return (
     <div className="relative space-y-4 p-4">
-      <div className="nb-shadow relative overflow-hidden rounded-3xl border-[3px] border-ink bg-card p-4 dark:border-ink-dark dark:bg-card-dark">
+      <div className="card-elevated relative overflow-hidden rounded-3xl bg-parchment-panel p-4 dark:bg-ink-panel">
         {isComplete && <ConfettiBurst />}
         <div className="relative flex items-center justify-between">
           {isComplete ? (
-            <h1 className="flex items-center gap-2 font-display text-xl text-ink dark:text-ink-dark">
-              <PartyPopper className="text-yellow" size={24} />
+            <h1 className="flex items-center gap-2 font-display text-xl text-ink dark:text-cream">
+              <PartyPopper className="text-gold" size={24} />
               Game complete
             </h1>
           ) : (
             <div className="flex-1">
-              <p className="flex items-center gap-1 text-xs font-extrabold uppercase tracking-wide text-muted dark:text-muted-dark">
+              <p className="mb-1 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
                 <Shuffle size={12} />
-                Dealer: <span className="normal-case text-ink dark:text-ink-dark">{dealer.name}</span>
+                Dealer: <span className="normal-case text-ink dark:text-cream">{dealer.name}</span>
               </p>
-              <p className="font-display text-3xl text-ink dark:text-ink-dark">
-                {wildRankWordForRound(game.currentRound)}
-              </p>
+              <RoundCornerCard key={game.currentRound} round={game.currentRound} wildRankWord={wildRankWordForRound(game.currentRound)} />
               <div className="mt-2 flex items-center gap-2">
-                <div className="h-2.5 w-full max-w-[200px] overflow-hidden rounded-full border-2 border-ink dark:border-ink-dark">
+                <div className="h-1.5 w-full max-w-[200px] overflow-hidden rounded-full bg-parchment-line dark:bg-ink-line">
                   <div
-                    className="h-full bg-red transition-all duration-500"
+                    className="h-full rounded-full bg-gold transition-all duration-500"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -315,14 +314,14 @@ function LiveGame({ gameId }) {
               to="/play/new"
               aria-label="Start new game"
               title="Start new game"
-              className="nb-press-sm flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
+              className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
             >
               <Plus size={16} />
             </NavLink>
             <button
               type="button"
               onClick={handleCopyLink}
-              className="nb-press-sm flex items-center gap-1.5 rounded-full border-2 border-ink px-3 py-1.5 text-xs font-extrabold text-ink dark:border-ink-dark dark:text-ink-dark"
+              className="press flex items-center gap-1.5 rounded-full bg-muted/10 px-3 py-1.5 text-xs font-bold text-ink dark:bg-muted-dark/10 dark:text-cream"
             >
               {copied ? <Check size={14} /> : <Share2 size={14} />}
               {copied ? 'Copied!' : 'Share'}
@@ -356,7 +355,7 @@ function LiveGame({ gameId }) {
             type="button"
             onClick={() => setConfirmingUndo(true)}
             disabled={game.rounds.length === 0}
-            className="nb-press-sm mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-ink py-2 text-sm font-extrabold text-ink disabled:opacity-30 dark:border-ink-dark dark:text-ink-dark"
+            className="press mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold text-muted disabled:opacity-30 dark:text-muted-dark"
           >
             <Undo2 size={15} />
             Undo last entry
@@ -365,14 +364,14 @@ function LiveGame({ gameId }) {
       )}
 
       <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>
         <ScorecardGrid players={game.players} rounds={game.rounds} onEditRound={setEditingRound} />
       </div>
 
       {editingRound && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/60 p-0 sm:items-center sm:p-4">
-          <div className="nb-shadow animate-pop-in max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-3xl border-[3px] border-b-0 border-ink bg-card p-5 dark:border-ink-dark dark:bg-card-dark sm:rounded-3xl sm:border-b-[3px]">
-            <h2 className="mb-3 flex flex-wrap items-center gap-x-2 text-lg font-bold text-ink dark:text-ink-dark">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="card-elevated animate-pop-in max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-parchment-panel p-5 dark:bg-ink-panel sm:rounded-3xl">
+            <h2 className="mb-3 flex flex-wrap items-center gap-x-2 text-lg font-bold text-ink dark:text-cream">
               <span className="font-display text-xl">Edit {wildRankWordForRound(editingRound)}</span>
               <span className="flex items-center gap-1 text-sm font-bold text-muted dark:text-muted-dark">
                 <Shuffle size={12} />

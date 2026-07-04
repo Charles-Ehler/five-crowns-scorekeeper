@@ -27,11 +27,11 @@ import { listGames } from '../lib/games.js';
 import { computeStats } from '../lib/stats.js';
 
 const ACCENT = {
-  yellow: { bg: 'bg-yellow' },
-  red: { bg: 'bg-red' },
-  blue: { bg: 'bg-blue' },
-  green: { bg: 'bg-green' },
-  purple: { bg: 'bg-purple' },
+  gold: { bg: 'bg-gold' },
+  heart: { bg: 'bg-heart' },
+  spade: { bg: 'bg-spade' },
+  club: { bg: 'bg-club' },
+  star: { bg: 'bg-star' },
 };
 
 function formatDate(timestamp) {
@@ -43,7 +43,7 @@ function GameContext({ gameId, createdAt, extra }) {
   return (
     <p className="flex items-center gap-1">
       {extra && <span>{extra}</span>}
-      <NavLink to={`/history/${gameId}`} className="font-extrabold text-ink underline decoration-blue decoration-[3px] dark:text-ink-dark">
+      <NavLink to={`/history/${gameId}`} className="font-bold text-gold-deep dark:text-gold">
         View game
       </NavLink>
       {formatDate(createdAt) && <span>· {formatDate(createdAt)}</span>}
@@ -53,7 +53,7 @@ function GameContext({ gameId, createdAt, extra }) {
 
 function SectionHeader({ icon: Icon, children }) {
   return (
-    <h2 className="mb-3 flex items-center gap-2 font-display text-xl text-ink dark:text-ink-dark">
+    <h2 className="mb-3 flex items-center gap-2 font-display text-xl text-ink dark:text-cream">
       <Icon size={18} />
       {children}
     </h2>
@@ -71,7 +71,7 @@ export default function Stats() {
   }, []);
 
   if (error) {
-    return <div className="p-4 font-bold text-red">Couldn't load stats: {error}</div>;
+    return <div className="p-4 font-bold text-heart">Couldn't load stats: {error}</div>;
   }
 
   if (stats === undefined) {
@@ -99,11 +99,11 @@ export default function Stats() {
 
   return (
     <div className="space-y-8 p-4">
-      <h1 className="font-display text-2xl text-ink dark:text-ink-dark">Stats</h1>
+      <h1 className="font-display text-2xl text-ink dark:text-cream">Stats</h1>
 
       {/* Hero: podium leaderboard */}
-      <section className="nb-shadow rounded-3xl border-[3px] border-ink bg-card p-4 dark:border-ink-dark dark:bg-card-dark">
-        <p className="mb-3 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">Leaderboard · wins</p>
+      <section className="card-elevated rounded-3xl bg-parchment-panel p-4 dark:bg-ink-panel">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Leaderboard · wins</p>
         <Leaderboard players={byWins} />
         <div className="mt-5">
           <WinBar
@@ -125,14 +125,14 @@ export default function Stats() {
         </div>
 
         {playersWithNemesis.length > 0 && (
-          <div className="nb-shadow-sm mt-4 rounded-2xl border-[3px] border-ink bg-card p-4 dark:border-ink-dark dark:bg-card-dark">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
+          <div className="card-elevated mt-4 rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
               <Target size={14} />
               Nemesis
             </p>
             <ul className="space-y-1.5 text-sm">
               {playersWithNemesis.map((p) => (
-                <li key={p.name} className="flex items-center justify-between text-ink dark:text-ink-dark">
+                <li key={p.name} className="flex items-center justify-between text-ink dark:text-cream">
                   <span className="font-bold">{p.name}</span>
                   <span>
                     <span className="font-extrabold tabular-nums">
@@ -155,7 +155,7 @@ export default function Stats() {
           {stats.bestRound && (
             <StatCard
               icon={Gem}
-              accent={ACCENT.green}
+              accent={ACCENT.club}
               label="Cleanest round"
               value={stats.bestRound.score}
               playerName={stats.bestRound.playerName}
@@ -171,7 +171,7 @@ export default function Stats() {
           {stats.worstRound && (
             <StatCard
               icon={Flame}
-              accent={ACCENT.red}
+              accent={ACCENT.heart}
               label="Rough round"
               value={stats.worstRound.score}
               playerName={stats.worstRound.playerName}
@@ -187,7 +187,7 @@ export default function Stats() {
           {stats.bestGame && (
             <StatCard
               icon={Medal}
-              accent={ACCENT.yellow}
+              accent={ACCENT.gold}
               label="Best game ever"
               value={stats.bestGame.total}
               playerName={stats.bestGame.playerName}
@@ -197,7 +197,7 @@ export default function Stats() {
           {stats.worstGame && (
             <StatCard
               icon={CloudRain}
-              accent={ACCENT.blue}
+              accent={ACCENT.spade}
               label="The struggle"
               value={stats.worstGame.total}
               playerName={stats.worstGame.playerName}
@@ -207,7 +207,7 @@ export default function Stats() {
           {stats.mostLosses && (
             <StatCard
               icon={Skull}
-              accent={ACCENT.blue}
+              accent={ACCENT.spade}
               label="Most losses"
               value={stats.mostLosses.losses}
               unit={stats.mostLosses.losses === 1 ? 'last place' : 'last places'}
@@ -217,7 +217,7 @@ export default function Stats() {
           {byLongestStreak.longestStreak > 0 && (
             <StatCard
               icon={Zap}
-              accent={ACCENT.purple}
+              accent={ACCENT.star}
               label="Longest streak"
               value={byLongestStreak.longestStreak}
               unit="wins"
@@ -226,21 +226,21 @@ export default function Stats() {
           )}
           <StatCard
             icon={TrendingUp}
-            accent={ACCENT.red}
+            accent={ACCENT.heart}
             label="Highest average"
             value={byHighestAvg.average.toFixed(1)}
             playerName={byHighestAvg.name}
           />
           <StatCard
             icon={TrendingDown}
-            accent={ACCENT.green}
+            accent={ACCENT.club}
             label="Lowest average"
             value={byLowestAvg.average.toFixed(1)}
             playerName={byLowestAvg.name}
           />
           <StatCard
             icon={Users}
-            accent={ACCENT.blue}
+            accent={ACCENT.spade}
             label="Most active"
             value={byMostActive.gamesPlayed}
             unit="games"
@@ -249,12 +249,12 @@ export default function Stats() {
         </div>
 
         {activeStreaks.length > 0 && (
-          <div className="nb-shadow-sm mt-3 rounded-2xl border-[3px] border-ink bg-card p-4 dark:border-ink-dark dark:bg-card-dark">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
+          <div className="card-elevated mt-3 rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
               <Zap size={14} />
               Current streaks
             </p>
-            <ul className="space-y-1 text-sm text-ink dark:text-ink-dark">
+            <ul className="space-y-1 text-sm text-ink dark:text-cream">
               {activeStreaks.map((p) => (
                 <li key={p.name} className="flex justify-between">
                   <span>{p.name}</span>
@@ -274,7 +274,7 @@ export default function Stats() {
             {stats.mostImproved && (
               <StatCard
                 icon={Sparkles}
-                accent={ACCENT.purple}
+                accent={ACCENT.star}
                 label="Most improved"
                 value={stats.mostImproved.improvement.toFixed(1)}
                 unit="pts"
@@ -285,7 +285,7 @@ export default function Stats() {
             {stats.closer && (
               <StatCard
                 icon={Flag}
-                accent={ACCENT.green}
+                accent={ACCENT.club}
                 label="The closer"
                 value={Math.round(stats.closer.rate * 100)}
                 unit="%"
@@ -296,7 +296,7 @@ export default function Stats() {
             {stats.bestComeback && (
               <StatCard
                 icon={Rocket}
-                accent={ACCENT.yellow}
+                accent={ACCENT.gold}
                 label="Comeback kid"
                 value={stats.bestComeback.comebackSize}
                 unit="pts"

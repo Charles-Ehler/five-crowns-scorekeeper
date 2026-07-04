@@ -1,14 +1,12 @@
-// Five Crowns' five suits, used purely as a decorative accent system
-// (player badges, avatars, chips) — never tied to actual game logic.
-// Neubrutalism reads as solid color blocks, not colored text — every suit
-// pairs its fill with black ink text/borders, never a tinted text color,
-// so contrast stays consistent across all five without per-color tuning.
+// Five Crowns' five suits, used as the app's player-identity system — real
+// deck suits (spade/heart/diamond/club) plus the game's own 5th suit (star),
+// each with a fixed thematic color, rather than an arbitrary rainbow.
 export const SUITS = [
-  { key: 'yellow', bg: 'bg-yellow' },
-  { key: 'red', bg: 'bg-red' },
-  { key: 'blue', bg: 'bg-blue' },
-  { key: 'green', bg: 'bg-green' },
-  { key: 'purple', bg: 'bg-purple' },
+  { key: 'spade', symbol: '♠', bg: 'bg-spade' },
+  { key: 'heart', symbol: '♥', bg: 'bg-heart' },
+  { key: 'diamond', symbol: '♦', bg: 'bg-diamond' },
+  { key: 'club', symbol: '♣', bg: 'bg-club' },
+  { key: 'star', symbol: '★', bg: 'bg-star' },
 ];
 
 export function suitForIndex(index) {
@@ -16,8 +14,8 @@ export function suitForIndex(index) {
 }
 
 // Deterministic hash so the same player name always lands on the same suit
-// color everywhere in the app (score entry, history, stats), rather than a
-// color tied to array position within one specific game's player list.
+// everywhere in the app (score entry, history, stats), rather than a suit
+// tied to array position within one specific game's player list.
 function hashString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i += 1) {

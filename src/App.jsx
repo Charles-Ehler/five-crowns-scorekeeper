@@ -1,5 +1,5 @@
 import { Navigate, useLocation, Route, Routes } from 'react-router-dom';
-import { Moon, Sun, Volume2, VolumeX } from 'lucide-react';
+import { Crown, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import BottomNav from './components/BottomNav.jsx';
 import Play from './pages/Play.jsx';
 import History from './pages/History.jsx';
@@ -17,11 +17,12 @@ export default function App() {
 
   return (
     <PlayerPhotosProvider>
-      <div className="flex min-h-screen flex-col bg-cream dark:bg-canvas-dark">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b-[3px] border-ink bg-cream px-4 py-3 dark:border-ink-dark dark:bg-canvas-dark">
-          <h1 className="flex items-baseline gap-1.5 font-display text-lg text-ink dark:text-ink-dark">
+      <div className="flex min-h-screen flex-col bg-parchment dark:bg-ink-deep">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-parchment-line bg-parchment/95 px-4 py-3 backdrop-blur dark:border-ink-line dark:bg-ink-deep/95">
+          <h1 className="flex items-baseline gap-1.5 font-display text-base uppercase tracking-widest text-ink dark:text-cream">
+            <Crown size={18} className="mb-0.5 text-gold" fill="currentColor" />
             Five Crowns
-            <span className="font-sans text-xs font-normal text-muted dark:text-muted-dark">v{__APP_VERSION__}</span>
+            <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted dark:text-muted-dark">v{__APP_VERSION__}</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -29,7 +30,7 @@ export default function App() {
               onClick={toggleFeedback}
               aria-label="Toggle sound and vibration"
               title="Sound & haptics (off by default)"
-              className="nb-press-sm flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
+              className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
             >
               {feedbackEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </button>
@@ -37,7 +38,7 @@ export default function App() {
               type="button"
               onClick={toggleTheme}
               aria-label="Toggle dark mode"
-              className="nb-press-sm flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
+              className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>

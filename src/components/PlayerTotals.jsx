@@ -32,27 +32,32 @@ export default function PlayerTotals({
           <li
             key={p.id}
             className={[
-              'nb-shadow-sm flex items-center gap-3 rounded-2xl border-[3px] p-3',
+              'card-elevated flex items-center gap-3 rounded-2xl p-3',
               isWinner
-                ? 'border-ink bg-yellow dark:border-ink-dark'
+                ? 'bg-gold/15 ring-1 ring-gold'
                 : isLeader
-                  ? 'border-ink bg-green/30 dark:border-ink-dark'
-                  : 'border-ink bg-card dark:border-ink-dark dark:bg-card-dark',
+                  ? 'bg-gold/8'
+                  : 'bg-parchment-panel dark:bg-ink-panel',
             ].join(' ')}
           >
             <span className="w-5 shrink-0 text-center text-sm font-extrabold text-muted dark:text-muted-dark">
               {i + 1}
             </span>
             <Avatar name={p.name} sizeClass="h-8 w-8 text-xs" />
-            <span className="min-w-0 flex-1 truncate font-bold text-ink dark:text-ink-dark">{p.name}</span>
+            <span className="min-w-0 flex-1 truncate font-bold text-ink dark:text-cream">{p.name}</span>
             {dealer?.id === p.id && <DealerBadge iconOnly />}
             {highlighted && (
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-card text-xs font-extrabold text-ink dark:border-ink-dark dark:bg-card-dark">
+              <span
+                className={[
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-extrabold',
+                  isWinner ? 'bg-gold text-ink' : 'bg-gold/25 text-gold-deep dark:text-gold',
+                ].join(' ')}
+              >
                 {isWinner ? '✓' : '●'}
               </span>
             )}
             <span className="flex flex-col items-end">
-              <span className="text-xl font-extrabold tabular-nums text-ink dark:text-ink-dark">{totals[p.id]}</span>
+              <span className="text-xl font-extrabold tabular-nums text-ink dark:text-cream">{totals[p.id]}</span>
               {!highlighted && behindLeader > 0 && (
                 <span className="text-[11px] font-bold text-muted dark:text-muted-dark">
                   +{behindLeader} behind

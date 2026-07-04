@@ -5,25 +5,33 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Neubrutalism: flat blocks of color, thick borders, hard offset shadows.
-     No gradients, no blur, no soft shadows anywhere. */
-  --color-cream: #FFFCF2;
-  --color-canvas-dark: #18181D;
-  --color-card: #FFFFFF;
-  --color-card-dark: #232329;
-  --color-ink: #141414;
-  --color-ink-dark: #F5F1E8;
-  --color-muted: #6B6B6B;
-  --color-muted-dark: #A8A8B0;
+  /* Royal Deck: a card-table's velvet + gold foil, not felt-green casino.
+     Player identity is drawn from the deck's own suits, not an arbitrary
+     rainbow — spade/heart/diamond/club, plus the game's real 5th suit (star). */
+  --color-parchment: #F6F0E4;
+  --color-parchment-panel: #FFFFFF;
+  --color-parchment-line: #E4D9C3;
+  --color-ink-deep: #120F1E;
+  --color-ink-panel: #1C1830;
+  --color-ink-line: #322C4A;
 
-  --color-yellow: #FFD93D;
-  --color-red: #FF5C5C;
-  --color-blue: #4D96FF;
-  --color-green: #4CAF6D;
-  --color-purple: #B185DB;
+  --color-ink: #1A1625;
+  --color-cream: #F6F0E4;
+  --color-muted: #6E6478;
+  --color-muted-dark: #9C93AC;
 
-  --font-display: "Lexend Mega", sans-serif;
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-gold: #D4A94A;
+  --color-gold-bright: #F0CE7C;
+  --color-gold-deep: #A9792B;
+
+  --color-spade: #7B8CAD;
+  --color-heart: #C4304F;
+  --color-diamond: #E0954D;
+  --color-club: #3E9A6D;
+  --color-star: #9B6FC0;
+
+  --font-display: "Cinzel", serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
 html, body, #root {
@@ -41,34 +49,23 @@ button, a {
   touch-action: manipulation;
 }
 
-/* Hard offset "block" shadow — the signature neubrutalist card treatment.
-   Shadow color matches the border color per theme, not a soft drop shadow. */
-.nb-shadow {
-  box-shadow: 4px 4px 0 0 var(--color-ink);
+/* Soft elevation — a quiet drop shadow plus a hairline border, rather than
+   the hard offset block-shadow of a poster. Dark mode leans on the border
+   more than the shadow, since shadows barely read against a dark panel. */
+.card-elevated {
+  border: 1px solid var(--color-parchment-line);
+  box-shadow: 0 1px 2px rgba(20, 14, 34, 0.06), 0 8px 20px rgba(20, 14, 34, 0.08);
 }
-.dark .nb-shadow {
-  box-shadow: 4px 4px 0 0 var(--color-ink-dark);
-}
-.nb-shadow-sm {
-  box-shadow: 2px 2px 0 0 var(--color-ink);
-}
-.dark .nb-shadow-sm {
-  box-shadow: 2px 2px 0 0 var(--color-ink-dark);
+.dark .card-elevated {
+  border-color: var(--color-ink-line);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 12px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Mechanical press: on press, the element travels exactly the shadow's
-   offset and the shadow disappears, so it visually "lands" flush — the
-   tactile signature of this style, not just an opacity/scale tap effect. */
-.nb-press {
-  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+.press {
+  transition: transform 120ms ease-out;
 }
-.nb-press:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 0 transparent !important;
-}
-.nb-press-sm:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 0 transparent !important;
+.press:active {
+  transform: scale(0.97);
 }
 
 @keyframes page-in {
@@ -100,6 +97,30 @@ button, a {
 }
 .animate-pop-in {
   animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* The signature moment: the round's corner-index card turns over to reveal
+   the next wild rank, echoing the one rule that defines Five Crowns — the
+   wild rank climbs a step every round. */
+@keyframes card-flip-in {
+  from {
+    transform: rotateY(-100deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+.animate-card-flip {
+  animation: card-flip-in 480ms cubic-bezier(0.34, 1, 0.64, 1);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-flip {
+    animation: none;
+  }
 }
 
 @keyframes confetti-fall {

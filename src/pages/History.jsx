@@ -30,7 +30,7 @@ export default function History() {
   }
 
   if (error) {
-    return <div className="p-4 font-bold text-red">Couldn't load history: {error}</div>;
+    return <div className="p-4 font-bold text-heart">Couldn't load history: {error}</div>;
   }
 
   if (games === undefined) {
@@ -43,7 +43,7 @@ export default function History() {
 
   return (
     <div className="space-y-3 p-4">
-      <h1 className="font-display text-2xl text-ink dark:text-ink-dark">History</h1>
+      <h1 className="font-display text-2xl text-ink dark:text-cream">History</h1>
       {games.map((game) => {
         const totals = computeTotals(game.players, game.rounds);
         const winners = game.players.filter((p) => game.winnerIds?.includes(p.id));
@@ -52,7 +52,7 @@ export default function History() {
         return (
           <div
             key={game.id}
-            className="nb-shadow-sm flex items-center gap-2 rounded-2xl border-[3px] border-ink bg-card p-3 dark:border-ink-dark dark:bg-card-dark"
+            className="card-elevated flex items-center gap-2 rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel"
           >
             <NavLink to={`/history/${game.id}`} className="min-w-0 flex-1">
               <div className="mb-1 flex -space-x-2">
@@ -64,9 +64,9 @@ export default function History() {
                   />
                 ))}
               </div>
-              <p className="truncate font-bold text-ink dark:text-ink-dark">{game.players.map((p) => p.name).join(', ')}</p>
+              <p className="truncate font-bold text-ink dark:text-cream">{game.players.map((p) => p.name).join(', ')}</p>
               <p className="flex items-center gap-1 text-xs text-muted dark:text-muted-dark">
-                {isComplete ? <Trophy size={12} className="text-ink dark:text-ink-dark" /> : <Clock3 size={12} />}
+                {isComplete ? <Trophy size={12} className="text-gold" /> : <Clock3 size={12} />}
                 {formatDate(game.createdAt)} · {isComplete ? `Winner: ${winnerSummary}` : 'In progress'}
               </p>
             </NavLink>
@@ -74,7 +74,7 @@ export default function History() {
               type="button"
               onClick={() => setDeletingId(game.id)}
               aria-label="Delete game"
-              className="nb-press-sm flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-ink text-ink dark:border-ink-dark dark:text-ink-dark"
+              className="press flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
             >
               <Trash2 size={16} />
             </button>
