@@ -12,7 +12,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
-import { TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId } from './fiveCrowns.js';
+import { MAX_PLAYERS, TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId } from './fiveCrowns.js';
 import { CURRENT_GAME_KEY } from './storageKeys.js';
 
 const GAMES_COLLECTION = 'fiveCrowns_games';
@@ -43,6 +43,28 @@ export async function createGame(playerNames) {
   });
   await Promise.all(playerNames.map((name) => saveRecentPlayerName(name)));
   return ref.id;
+}
+
+// Joining mid-game just appends to the players array — computeTotals already
+// treats a missing round.scores entry as 0, so past rounds don't need
+// backfilling. Dealer rotation (round % players.length) naturally shifts to
+// include the new seat going forward; that's the accepted tradeoff for not
+// storing a separate dealer field.
+export async function addPlayerToGame(gameId, name) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const ref = doc(db, GAMES_COLLECTION, gameId);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error('Game not found');
+    const game = snap.data();
+    if (game.players.length >= MAX_PLAYERS) throw new Error(`Games are capped at ${MAX_PLAYERS} players`);
+    tx.update(ref, {
+      players: [...game.players, { id: createPlayerId(), name: trimmed }],
+      updatedAt: serverTimestamp(),
+    });
+  });
+  await saveRecentPlayerName(trimmed);
 }
 
 // Handles both a brand-new round and editing a past round through the same

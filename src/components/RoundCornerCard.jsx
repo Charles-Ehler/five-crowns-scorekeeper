@@ -13,13 +13,13 @@ export default function RoundCornerCard({ round, wildRankWord }) {
 
   return (
     <div className="animate-card-flip flex items-center gap-3" style={{ perspective: '600px' }}>
-      <div className={`card-elevated flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-parchment-panel dark:bg-ink-panel`}>
-        <span className="font-display text-2xl leading-none text-ink dark:text-cream">{rank}</span>
-        <span className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] text-cream ${suit.bg}`}>
+      <div className={`card-elevated flex h-20 w-[4.5rem] shrink-0 flex-col items-center justify-center rounded-lg bg-parchment-panel dark:bg-ink-panel`}>
+        <span className="font-display text-3xl leading-none text-ink dark:text-cream">{rank}</span>
+        <span className={`mt-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] text-cream ${suit.bg}`}>
           {suit.symbol}
         </span>
       </div>
-      <p className="font-display text-3xl text-ink dark:text-cream">{wildRankWord}</p>
+      <p className="font-display text-4xl text-ink dark:text-cream">{wildRankWord}</p>
     </div>
   );
 }

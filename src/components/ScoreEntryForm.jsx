@@ -26,9 +26,31 @@ export default function ScoreEntryForm({
   const [entries, setEntries] = useState(() => initialEntries(players, initialData));
   const inputRefs = useRef({});
 
-  const someoneWentOut = players.some((p) => entries[p.id].wentOut);
+  // A player can join mid-game, which adds them to `players` without
+  // remounting this form (same round, same key). `entries` state won't have
+  // their id until this backfills it, so every read below goes through this
+  // merged view instead of the raw state — the effect keeps state itself in
+  // sync for edits, but rendering can't wait for the effect to run first.
+  const safeEntries = {};
+  players.forEach((p) => {
+    safeEntries[p.id] = entries[p.id] ?? { score: '', wentOut: false };
+  });
+
+  useEffect(() => {
+    setEntries((prev) => {
+      const missing = players.filter((p) => !prev[p.id]);
+      if (missing.length === 0) return prev;
+      const next = { ...prev };
+      missing.forEach((p) => {
+        next[p.id] = { score: '', wentOut: false };
+      });
+      return next;
+    });
+  }, [players]);
+
+  const someoneWentOut = players.some((p) => safeEntries[p.id].wentOut);
   const scoresValid = players.every((p) => {
-    const value = entries[p.id]?.score;
+    const value = safeEntries[p.id].score;
     // A blank score defaults to 0 at submit time, so it's not blocking — only
     // a non-numeric or negative entry is.
     return value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0);
@@ -41,8 +63,8 @@ export default function ScoreEntryForm({
     if (!onDraftChange || !roundNumber) return;
     const scores = {};
     players.forEach((p) => {
-      const value = entries[p.id].score;
-      scores[p.id] = { score: value === '' ? 0 : Number(value) || 0, wentOut: entries[p.id].wentOut };
+      const value = safeEntries[p.id].score;
+      scores[p.id] = { score: value === '' ? 0 : Number(value) || 0, wentOut: safeEntries[p.id].wentOut };
     });
     onDraftChange({ roundNumber, scores });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,13 +82,14 @@ export default function ScoreEntryForm({
   // else clears whoever had it before.
   function toggleWentOut(playerId) {
     setEntries((prev) => {
-      const turningOn = !prev[playerId].wentOut;
+      const current = (p) => prev[p] ?? { score: '', wentOut: false };
+      const turningOn = !current(playerId).wentOut;
       const next = {};
       players.forEach((p) => {
         if (p.id === playerId) {
           next[p.id] = { score: turningOn ? '0' : '', wentOut: turningOn };
         } else {
-          next[p.id] = turningOn && prev[p.id].wentOut ? { score: '', wentOut: false } : prev[p.id];
+          next[p.id] = turningOn && current(p.id).wentOut ? { score: '', wentOut: false } : current(p.id);
         }
       });
       return next;
@@ -76,7 +99,7 @@ export default function ScoreEntryForm({
   function focusNextInput(index) {
     for (let i = index + 1; i < players.length; i += 1) {
       const nextPlayer = players[i];
-      if (entries[nextPlayer.id].wentOut) continue; // locked field, skip
+      if (safeEntries[nextPlayer.id].wentOut) continue; // locked field, skip
       inputRefs.current[nextPlayer.id]?.focus();
       inputRefs.current[nextPlayer.id]?.select();
       return;
@@ -95,10 +118,10 @@ export default function ScoreEntryForm({
     if (!allValid) return;
     const scoresByPlayerId = {};
     players.forEach((p) => {
-      const value = entries[p.id].score;
+      const value = safeEntries[p.id].score;
       scoresByPlayerId[p.id] = {
         score: value === '' ? 0 : Number(value),
-        wentOut: entries[p.id].wentOut,
+        wentOut: safeEntries[p.id].wentOut,
       };
     });
     onSubmit(scoresByPlayerId);
@@ -107,7 +130,7 @@ export default function ScoreEntryForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-2.5">
       {players.map((p, i) => {
-        const wentOut = entries[p.id].wentOut;
+        const wentOut = safeEntries[p.id].wentOut;
         return (
           <div
             key={p.id}
@@ -137,7 +160,7 @@ export default function ScoreEntryForm({
               pattern="[0-9]*"
               enterKeyHint="next"
               readOnly={wentOut}
-              value={entries[p.id].score}
+              value={safeEntries[p.id].score}
               onChange={(e) => updateScore(p.id, e.target.value)}
               onKeyDown={(e) => handleScoreKeyDown(e, i)}
               placeholder="0"

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, PartyPopper, Plus, Shuffle, Sparkles, Share2, Undo2, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, ListOrdered, PartyPopper, Plus, Shuffle, Sparkles, Share2, Undo2, UserPlus, X } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
@@ -11,7 +11,7 @@ import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import ShareResultButton from '../components/ShareResultButton.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
 import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
-import { createGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
+import { addPlayerToGame, createGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
 import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
@@ -226,6 +226,9 @@ function LiveGame({ gameId }) {
   const [confirmingUndo, setConfirmingUndo] = useState(false);
   const [copied, setCopied] = useState(false);
   const [draftRound, setDraftRound] = useState(null);
+  const [addingPlayer, setAddingPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [addPlayerError, setAddPlayerError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem(CURRENT_GAME_KEY, gameId);
@@ -288,9 +291,25 @@ function LiveGame({ gameId }) {
     }
   }
 
+  function closeAddPlayer() {
+    setAddingPlayer(false);
+    setNewPlayerName('');
+    setAddPlayerError(null);
+  }
+
+  async function handleAddPlayer() {
+    if (!newPlayerName.trim()) return;
+    try {
+      await addPlayerToGame(game.id, newPlayerName);
+      closeAddPlayer();
+    } catch (err) {
+      setAddPlayerError(err.message ?? 'Failed to add player');
+    }
+  }
+
   return (
-    <div className="relative space-y-4 p-4">
-      <div className="card-elevated relative overflow-hidden rounded-3xl bg-parchment-panel p-4 dark:bg-ink-panel">
+    <div className="relative space-y-6 p-4">
+      <div className="card-elevated sticky top-0 z-10 relative overflow-hidden rounded-3xl bg-parchment-panel bg-gradient-to-br from-gold/15 via-parchment-panel to-parchment-panel p-5 dark:bg-ink-panel dark:from-gold/10 dark:via-ink-panel dark:to-ink-panel">
         {isComplete && <ConfettiBurst />}
         <div className="relative flex items-center justify-between">
           {isComplete ? (
@@ -300,19 +319,19 @@ function LiveGame({ gameId }) {
             </h1>
           ) : (
             <div className="flex-1">
-              <p className="mb-1 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
-                <Shuffle size={12} />
-                Dealer: <span className="normal-case text-ink dark:text-cream">{dealer.name}</span>
+              <p className="mb-1.5 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
+                <Shuffle size={14} />
+                Dealer: <span className="normal-case text-base text-ink dark:text-cream">{dealer.name}</span>
               </p>
               <RoundCornerCard key={game.currentRound} round={game.currentRound} wildRankWord={wildRankWordForRound(game.currentRound)} />
-              <div className="mt-2 flex items-center gap-2">
-                <div className="h-1.5 w-full max-w-[200px] overflow-hidden rounded-full bg-parchment-line dark:bg-ink-line">
+              <div className="mt-2.5 flex items-center gap-2">
+                <div className="h-2 w-full max-w-[200px] overflow-hidden rounded-full bg-parchment-line dark:bg-ink-line">
                   <div
                     className="h-full rounded-full bg-gold transition-all duration-500"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
-                <span className="shrink-0 text-[11px] font-bold text-muted dark:text-muted-dark">
+                <span className="shrink-0 text-xs font-bold text-muted dark:text-muted-dark">
                   Round {game.currentRound} of {TOTAL_ROUNDS}
                 </span>
               </div>
@@ -339,19 +358,36 @@ function LiveGame({ gameId }) {
         </div>
       </div>
 
-      <PlayerTotals
-        players={game.players}
-        rounds={game.rounds}
-        winnerIds={isComplete ? game.winnerIds : []}
-        complete={isComplete}
-        draftRound={isComplete ? null : draftRound}
-        dealerRound={isComplete ? null : game.currentRound}
-      />
+      <div>
+        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
+          <ListOrdered size={13} />
+          Standings
+        </p>
+        <PlayerTotals
+          players={game.players}
+          rounds={game.rounds}
+          winnerIds={isComplete ? game.winnerIds : []}
+          complete={isComplete}
+          draftRound={isComplete ? null : draftRound}
+          dealerRound={isComplete ? null : game.currentRound}
+        />
+        {!isComplete && game.players.length < MAX_PLAYERS && (
+          <button
+            type="button"
+            onClick={() => setAddingPlayer(true)}
+            className="press mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-2.5 text-sm font-semibold text-muted dark:border-ink-line dark:text-muted-dark"
+          >
+            <UserPlus size={16} />
+            Add player
+          </button>
+        )}
+      </div>
 
       {isComplete && <ShareResultButton game={game} />}
 
       {!isComplete && (
         <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">This round's scores</p>
           <ScoreEntryForm
             key={game.currentRound}
             players={game.players}
@@ -376,6 +412,43 @@ function LiveGame({ gameId }) {
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>
         <ScorecardGrid players={game.players} rounds={game.rounds} onEditRound={setEditingRound} />
       </div>
+
+      {addingPlayer && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="card-elevated animate-pop-in w-full max-w-sm rounded-t-3xl bg-parchment-panel p-5 dark:bg-ink-panel sm:rounded-3xl">
+            <h2 className="mb-3 font-display text-xl text-ink dark:text-cream">Add player</h2>
+            <input
+              type="text"
+              autoFocus
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              placeholder="Player name"
+              className="card-elevated w-full rounded-2xl bg-parchment p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-deep dark:text-cream"
+            />
+            <p className="mt-2 text-xs text-muted dark:text-muted-dark">
+              They join from this round onward — past rounds count as 0 for them.
+            </p>
+            {addPlayerError && <p className="mt-2 text-sm font-bold text-heart">{addPlayerError}</p>}
+            <div className="mt-4 flex gap-3">
+              <button
+                type="button"
+                onClick={closeAddPlayer}
+                className="press flex-1 rounded-xl border border-parchment-line py-3 font-semibold text-ink dark:border-ink-line dark:text-cream"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddPlayer}
+                disabled={!newPlayerName.trim()}
+                className="press flex-1 rounded-xl bg-gold py-3 font-bold text-ink disabled:opacity-40"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingRound && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
