@@ -7,7 +7,7 @@ export default function ScorecardGrid({ players, rounds, onEditRound }) {
   const roundsByNumber = new Map(rounds.map((r) => [r.roundNumber, r]));
 
   return (
-    <div className="card-elevated overflow-x-auto rounded-2xl bg-parchment-panel dark:bg-ink-panel">
+    <div className="card-elevated overflow-x-auto overflow-y-hidden rounded-2xl bg-parchment-panel dark:bg-ink-panel">
       <table className="w-full min-w-max text-sm">
         <thead>
           <tr className="border-b border-parchment-line dark:border-ink-line">

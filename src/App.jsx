@@ -17,7 +17,7 @@ export default function App() {
 
   return (
     <PlayerPhotosProvider>
-      <div className="flex h-screen flex-col bg-parchment dark:bg-ink-deep">
+      <div className="flex h-dvh flex-col overflow-hidden bg-parchment dark:bg-ink-deep">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-parchment-line bg-parchment/95 px-4 py-3 backdrop-blur dark:border-ink-line dark:bg-ink-deep/95">
           <h1 className="flex items-baseline gap-1.5 font-display text-base uppercase tracking-widest text-ink dark:text-cream">
             <Crown size={18} className="mb-0.5 text-gold" fill="currentColor" />

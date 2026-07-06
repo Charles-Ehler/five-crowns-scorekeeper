@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft, Swords, Trophy } from 'lucide-react';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import { subscribeToGame } from '../lib/games.js';
@@ -47,6 +47,15 @@ export default function GameDetail() {
         {isComplete && <Trophy size={20} className="text-gold" />}
         {isComplete ? 'Final standings' : `In progress · round ${game.currentRound}`}
       </h1>
+      {!isComplete && (
+        <NavLink
+          to={`/play/${game.id}`}
+          className="press flex w-full items-center justify-center gap-1.5 rounded-2xl bg-gold py-3 font-display text-base text-ink shadow-lg shadow-gold/20"
+        >
+          <Swords size={18} />
+          Continue game
+        </NavLink>
+      )}
       <PlayerTotals
         players={game.players}
         rounds={game.rounds}
