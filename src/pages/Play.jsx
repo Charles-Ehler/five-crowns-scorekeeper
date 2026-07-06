@@ -309,7 +309,7 @@ function LiveGame({ gameId }) {
 
   return (
     <div className="relative space-y-6 p-4">
-      <div className="card-elevated sticky top-0 z-10 relative overflow-hidden rounded-3xl bg-parchment-panel bg-gradient-to-br from-gold/15 via-parchment-panel to-parchment-panel p-5 dark:bg-ink-panel dark:from-gold/10 dark:via-ink-panel dark:to-ink-panel">
+      <div className="card-elevated sticky top-0 z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel">
         {isComplete && <ConfettiBurst />}
         <div className="relative flex items-center justify-between">
           {isComplete ? (
