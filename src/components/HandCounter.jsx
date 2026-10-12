@@ -21,8 +21,9 @@ const JOKER_VALUE = 50;
 
 // Tap the cards left in your hand and it adds them up, instead of doing the
 // math out loud at the table. roundNumber picks which rank is wild (round 1 =
-// 3s ... round 11 = Kings), so that rank's key counts 20.
-export default function HandCounter({ playerName, roundNumber, onDone, onCancel }) {
+// 3s ... round 11 = Kings), so that rank's key counts 20. Passing
+// onRoundChange shows a wild-rank picker (practice mode, no game attached).
+export default function HandCounter({ playerName, roundNumber, onDone, onCancel, onRoundChange, doneLabel }) {
   const [cards, setCards] = useState([]);
   const wildIndex = roundNumber - 1;
   const total = cards.reduce((sum, c) => sum + c.value, 0);
@@ -50,6 +51,25 @@ export default function HandCounter({ playerName, roundNumber, onDone, onCancel 
             <X size={18} />
           </button>
         </div>
+
+        {onRoundChange && (
+          <div className="mb-3">
+            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Wild this round</p>
+            <div className="grid grid-cols-11 gap-1">
+              {CARDS.map((card, i) => (
+                <button
+                  key={card.label}
+                  type="button"
+                  onClick={() => onRoundChange(i + 1)}
+                  aria-label={`${card.label}s wild`}
+                  className={`press rounded-md py-1.5 text-[11px] font-bold ${i === wildIndex ? 'bg-gold text-ink' : 'bg-muted/10 text-muted dark:bg-muted-dark/10 dark:text-muted-dark'}`}
+                >
+                  {card.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-3 flex min-h-[3.25rem] items-center gap-2 rounded-2xl bg-parchment p-2 dark:bg-ink-deep">
           <div className="flex min-w-0 flex-1 flex-wrap gap-1">
@@ -115,7 +135,7 @@ export default function HandCounter({ playerName, roundNumber, onDone, onCancel 
             onClick={() => onDone(total)}
             className="press flex-1 rounded-xl bg-gold py-3 font-bold text-ink"
           >
-            Use {total} points
+            {doneLabel ?? `Use ${total} points`}
           </button>
         </div>
       </div>

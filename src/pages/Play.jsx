@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserPlus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Layers, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserPlus, X } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
+import HandCounter from '../components/HandCounter.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import RaceChart from '../components/RaceChart.jsx';
 import RoundCornerCard from '../components/RoundCornerCard.jsx';
@@ -40,6 +41,9 @@ function NewGameForm() {
   const [recentPlayers, setRecentPlayers] = useState([]);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(null);
+  // Practice hand counter: purely local state, never attached to a game, so
+  // nothing reaches Firestore or the stats.
+  const [practiceRound, setPracticeRound] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -217,6 +221,27 @@ function NewGameForm() {
       >
         {starting ? 'Starting…' : 'Start Game'}
       </button>
+
+      <button
+        type="button"
+        onClick={() => setPracticeRound(1)}
+        className="press flex w-full items-center justify-center gap-1.5 rounded-2xl border border-parchment-line py-3 text-sm font-semibold text-muted dark:border-ink-line dark:text-muted-dark"
+      >
+        <Layers size={16} />
+        Practice the hand counter
+        <span className="text-xs font-normal">· doesn't count</span>
+      </button>
+
+      {practiceRound && (
+        <HandCounter
+          playerName="Practice hand"
+          roundNumber={practiceRound}
+          onRoundChange={setPracticeRound}
+          doneLabel="Done"
+          onDone={() => setPracticeRound(null)}
+          onCancel={() => setPracticeRound(null)}
+        />
+      )}
     </div>
   );
 }
