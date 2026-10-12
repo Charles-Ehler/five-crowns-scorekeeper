@@ -11,7 +11,7 @@ export default function ScorecardGrid({ players, rounds, onEditRound }) {
       <table className="w-full min-w-max text-sm">
         <thead>
           <tr className="border-b border-parchment-line dark:border-ink-line">
-            <th className="sticky left-0 bg-parchment-panel p-2.5 text-left text-xs font-semibold uppercase tracking-wide text-muted dark:bg-ink-panel dark:text-muted-dark">
+            <th className="sticky left-0 bg-parchment-panel p-2.5 text-left text-sm font-semibold text-muted dark:bg-ink-panel dark:text-muted-dark">
               Round
             </th>
             {players.map((p) => {

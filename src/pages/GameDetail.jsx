@@ -41,7 +41,7 @@ function Replay({ game }) {
     <div className="space-y-4">
       <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Replay</p>
+          <p className="text-sm font-semibold text-muted dark:text-muted-dark">Replay</p>
           <p className="text-xs font-bold text-ink dark:text-cream">
             {round === 0 ? 'Before the deal' : `After ${wildRankWordForRound(round)} · R${round}`}
           </p>

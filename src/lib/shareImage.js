@@ -1,10 +1,10 @@
 import { computeTotals } from './fiveCrowns.js';
 
 const WIDTH = 640;
-const INK_DEEP = '#120F1E';
-const CREAM = '#F6F0E4';
-const GOLD = '#D4A94A';
-const MUTED = '#9C93AC';
+const INK_DEEP = '#0C1530';
+const CREAM = '#F4F6FB';
+const GOLD = '#F2B630';
+const MUTED = '#94A0C2';
 const ROW_HEIGHT = 78;
 
 // Draws a Royal Deck-style summary card to an offscreen canvas — deep ink
@@ -25,17 +25,17 @@ export function generateShareImage(game) {
   ctx.strokeRect(10, 10, WIDTH - 20, height - 20);
 
   ctx.fillStyle = GOLD;
-  ctx.font = '34px "Cinzel", serif';
+  ctx.font = '34px "Bodoni Moda", serif';
   ctx.fillText('FIVE CROWNS', margin + 12, margin + 38);
 
-  ctx.font = 'bold 15px "Manrope", system-ui, sans-serif';
+  ctx.font = 'bold 15px "Figtree", system-ui, sans-serif';
   ctx.fillStyle = MUTED;
   const dateLabel = game.completedAt?.toDate
     ? game.completedAt.toDate().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
     : '';
   ctx.fillText(`Final standings${dateLabel ? ' · ' + dateLabel : ''}`, margin + 12, margin + 64);
 
-  ctx.strokeStyle = 'rgba(212, 169, 74, 0.35)';
+  ctx.strokeStyle = 'rgba(242, 182, 48, 0.35)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(margin + 12, margin + 80);
@@ -53,7 +53,7 @@ export function generateShareImage(game) {
     const rowH = ROW_HEIGHT - 14;
 
     if (isWinner) {
-      ctx.fillStyle = 'rgba(212, 169, 74, 0.15)';
+      ctx.fillStyle = 'rgba(242, 182, 48, 0.15)';
       ctx.strokeStyle = GOLD;
     } else {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
@@ -71,15 +71,15 @@ export function generateShareImage(game) {
     }
 
     ctx.fillStyle = MUTED;
-    ctx.font = 'bold 20px "Manrope", system-ui, sans-serif';
+    ctx.font = 'bold 20px "Figtree", system-ui, sans-serif';
     ctx.fillText(String(i + 1), rowX + 18, y + rowH / 2 + 7);
 
     ctx.fillStyle = CREAM;
-    ctx.font = 'bold 22px "Manrope", system-ui, sans-serif';
+    ctx.font = 'bold 22px "Figtree", system-ui, sans-serif';
     ctx.fillText(p.name, rowX + 52, y + rowH / 2 + 7);
 
     ctx.fillStyle = isWinner ? GOLD : CREAM;
-    ctx.font = 'bold 26px "Manrope", system-ui, sans-serif';
+    ctx.font = 'bold 26px "Figtree", system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(String(totals[p.id]), rowX + rowW - 20, y + rowH / 2 + 8);
     ctx.textAlign = 'left';

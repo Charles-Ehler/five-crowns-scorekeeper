@@ -12,7 +12,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
-import { MAX_PLAYERS, TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId } from './fiveCrowns.js';
+import { MAX_PLAYERS, MIN_PLAYERS, TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId } from './fiveCrowns.js';
 import { CURRENT_GAME_KEY } from './storageKeys.js';
 
 const GAMES_COLLECTION = 'fiveCrowns_games';
@@ -65,6 +65,26 @@ export async function addPlayerToGame(gameId, name) {
     });
   });
   await saveRecentPlayerName(trimmed);
+}
+
+// Leaving mid-game removes the player and every score they had in this game,
+// so a half-played game never counts toward their stats. Same full recompute
+// as round edits, so status and winners stay consistent.
+export async function removePlayerFromGame(gameId, playerId) {
+  const ref = doc(db, GAMES_COLLECTION, gameId);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error('Game not found');
+    const game = snap.data();
+    if (game.players.length <= MIN_PLAYERS) throw new Error(`Games need at least ${MIN_PLAYERS} players`);
+    const players = game.players.filter((p) => p.id !== playerId);
+    const rounds = game.rounds.map((r) => {
+      const scores = { ...r.scores };
+      delete scores[playerId];
+      return { ...r, scores };
+    });
+    tx.update(ref, { players, ...buildRoundsUpdate({ ...game, players }, rounds) });
+  });
 }
 
 // Handles both a brand-new round and editing a past round through the same

@@ -27,7 +27,7 @@ export default function Avatar({ name, sizeClass, className = '' }) {
         />
       ) : (
         <span
-          className={`flex h-full w-full items-center justify-center rounded-full font-bold text-cream ${suit.bg}`}
+          className={`flex h-full w-full items-center justify-center rounded-full font-display font-bold ${suit.key === 'star' ? 'text-ink' : 'text-cream'} ${suit.bg}`}
         >
           {trimmed ? trimmed.charAt(0).toUpperCase() : '?'}
         </span>

@@ -27,7 +27,7 @@ export default function RivalryCard({ pair, featured = false }) {
       >
         <div className="flex flex-1 flex-col items-center gap-1">
           {featured && (
-            <span className="mb-1 flex items-center gap-1 rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gold-deep dark:text-gold">
+            <span className="mb-1 flex items-center gap-1 rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold-deep dark:text-gold">
               <Swords size={10} />
               Current rivalry
             </span>

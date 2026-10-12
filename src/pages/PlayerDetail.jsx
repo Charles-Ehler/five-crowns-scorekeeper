@@ -198,15 +198,15 @@ export default function PlayerDetail() {
             <Trophy size={16} className="text-gold" />
             {player.wins}
           </span>
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Wins</span>
+          <span className="text-[11px] font-semibold text-muted dark:text-muted-dark">Wins</span>
         </div>
         <div className="flex flex-col items-center gap-0.5 p-3">
           <span className="text-2xl font-extrabold tabular-nums text-ink dark:text-cream">{winRate}%</span>
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Win rate</span>
+          <span className="text-[11px] font-semibold text-muted dark:text-muted-dark">Win rate</span>
         </div>
         <div className="flex flex-col items-center gap-0.5 p-3">
           <span className="text-2xl font-extrabold tabular-nums text-ink dark:text-cream">{player.average.toFixed(1)}</span>
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Avg score</span>
+          <span className="text-[11px] font-semibold text-muted dark:text-muted-dark">Avg score</span>
         </div>
       </div>
 
@@ -219,7 +219,7 @@ export default function PlayerDetail() {
 
       {placementCounts.length > 1 && (
         <section className="card-elevated rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Where they finish</p>
+          <p className="mb-3 text-sm font-semibold text-muted dark:text-muted-dark">Where they finish</p>
           <div className="flex h-28 items-end gap-2">
             {Array.from(placementCounts, (c) => c ?? 0).map((count, i) => (
               <div key={i} className="flex flex-1 flex-col items-center gap-1">
@@ -253,7 +253,7 @@ export default function PlayerDetail() {
 
       {player.nemesis && (
         <div className="card-elevated rounded-2xl bg-heart/10 p-4">
-          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-heart">
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-heart">
             <Target size={14} />
             Nemesis
           </p>

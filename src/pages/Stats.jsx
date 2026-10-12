@@ -106,7 +106,7 @@ export default function Stats() {
 
       {/* Hero: podium leaderboard */}
       <section className="card-elevated rounded-3xl bg-parchment-panel p-4 dark:bg-ink-panel">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Leaderboard · wins</p>
+        <p className="mb-3 text-sm font-semibold text-muted dark:text-muted-dark">Leaderboard · wins</p>
         <Leaderboard players={byWins} />
         <div className="mt-5">
           <WinBar
@@ -139,7 +139,7 @@ export default function Stats() {
 
         {playersWithNemesis.length > 0 && (
           <div className="card-elevated mt-4 rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
+            <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
               <Target size={14} />
               Nemesis
             </p>
@@ -263,7 +263,7 @@ export default function Stats() {
 
         {activeStreaks.length > 0 && (
           <div className="card-elevated mt-3 rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
+            <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
               <Zap size={14} />
               Current streaks
             </p>

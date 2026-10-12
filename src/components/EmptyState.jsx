@@ -6,7 +6,7 @@ function CardsIllustration() {
       <rect x="18" y="18" width="56" height="72" rx="6" transform="rotate(-10 18 18)" className="fill-heart/25 stroke-heart/40" strokeWidth="1.5" />
       <rect x="34" y="10" width="56" height="72" rx="6" transform="rotate(8 34 10)" className="fill-spade/25 stroke-spade/40" strokeWidth="1.5" />
       <rect x="30" y="14" width="56" height="72" rx="6" className="fill-parchment-panel stroke-gold dark:fill-ink-panel" strokeWidth="2" />
-      <text x="58" y="58" textAnchor="middle" fontSize="28" className="fill-gold" fontFamily="Cinzel, serif">
+      <text x="58" y="58" textAnchor="middle" fontSize="28" className="fill-gold" fontFamily="Bodoni Moda, serif">
         ?
       </text>
     </svg>

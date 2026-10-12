@@ -44,7 +44,7 @@ export default function HandCounter({ playerName, roundNumber, onDone, onCancel,
       >
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Count the hand</p>
+            <p className="text-sm font-semibold text-muted dark:text-muted-dark">Count the hand</p>
             <h2 className="font-display text-xl text-ink dark:text-cream">{playerName}</h2>
           </div>
           <button type="button" onClick={onCancel} aria-label="Close" className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream">
@@ -54,7 +54,7 @@ export default function HandCounter({ playerName, roundNumber, onDone, onCancel,
 
         {onRoundChange && (
           <div className="mb-3">
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Wild this round</p>
+            <p className="mb-1.5 text-sm font-semibold text-muted dark:text-muted-dark">Wild this round</p>
             <div className="grid grid-cols-11 gap-1">
               {CARDS.map((card, i) => (
                 <button

@@ -5,7 +5,7 @@ export default function StatCard({ icon: Icon, label, accent, value, unit, playe
         <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${accent.bg}`}>
           <Icon size={16} className="text-cream" />
         </span>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">{label}</p>
+        <p className="text-sm font-semibold text-muted dark:text-muted-dark">{label}</p>
       </div>
       <p className="text-3xl font-extrabold tabular-nums text-ink dark:text-cream">
         {value}

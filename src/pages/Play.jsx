@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, Layers, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserPlus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Layers, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserMinus, UserPlus, X } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
+import DealInterstitial from '../components/DealInterstitial.jsx';
 import HandCounter from '../components/HandCounter.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import RaceChart from '../components/RaceChart.jsx';
-import RoundCornerCard from '../components/RoundCornerCard.jsx';
+import PlayingCard from '../components/PlayingCard.jsx';
 import RoundRail from '../components/RoundRail.jsx';
 import ScoreEntryForm from '../components/ScoreEntryForm.jsx';
 import ScorecardGrid from '../components/ScorecardGrid.jsx';
@@ -15,7 +16,7 @@ import ShareResultButton from '../components/ShareResultButton.jsx';
 import WinnerReveal from '../components/WinnerReveal.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
 import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
-import { addPlayerToGame, createGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
+import { addPlayerToGame, createGame, removePlayerFromGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
 import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
@@ -192,7 +193,7 @@ function NewGameForm() {
 
       {availableRecent.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Recent players</p>
+          <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">Recent players</p>
           <div className="flex flex-wrap gap-2">
             {availableRecent.map((r) => (
               <button
@@ -257,6 +258,9 @@ function LiveGame({ gameId }) {
   const [addingPlayer, setAddingPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [addPlayerError, setAddPlayerError] = useState(null);
+  const [removingOpen, setRemovingOpen] = useState(false);
+  const [removingPlayer, setRemovingPlayer] = useState(null);
+  const [removeError, setRemoveError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem(CURRENT_GAME_KEY, gameId);
@@ -265,6 +269,20 @@ function LiveGame({ gameId }) {
     const unsubscribe = subscribeToGame(gameId, setGame, (err) => setError(err.message));
     return unsubscribe;
   }, [gameId]);
+
+  // Show the deal moment only when the round moves forward while watching,
+  // not on first load, undo, or switching games.
+  const [dealRound, setDealRound] = useState(null);
+  const lastRoundRef = useRef(null);
+  useEffect(() => {
+    if (!game) {
+      lastRoundRef.current = null;
+      return;
+    }
+    const prev = lastRoundRef.current;
+    if (game.status !== 'complete' && prev !== null && game.currentRound > prev) setDealRound(game.currentRound);
+    lastRoundRef.current = game.currentRound;
+  }, [game]);
 
   // Someone else may have deleted this game from another device — without
   // this, the Play tab would keep bouncing back to a dead game every time
@@ -347,18 +365,21 @@ function LiveGame({ gameId }) {
               <WinnerReveal game={game} />
             </div>
           ) : (
-            <div className="min-w-0 flex-1">
-              <p className="mb-1.5 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
-                <Shuffle size={14} />
-                Dealer: <span className="normal-case text-base text-ink dark:text-cream">{dealer.name}</span>
-              </p>
-              <RoundCornerCard key={game.currentRound} round={game.currentRound} wildRankWord={wildRankWordForRound(game.currentRound)} />
-              <p className="mt-2 text-xs font-bold text-muted dark:text-muted-dark">
-                Round {game.currentRound} of {TOTAL_ROUNDS} · {game.currentRound + 2} cards each
-              </p>
+            <div className="flex min-w-0 flex-1 items-center gap-4">
+              <PlayingCard key={game.currentRound} round={game.currentRound} />
+              <div className="min-w-0">
+                <p className="font-display text-[2rem] font-bold leading-none text-ink dark:text-cream">{wildRankWordForRound(game.currentRound)}</p>
+                <p className="mt-0.5 font-display text-lg italic text-gold-deep dark:text-gold">are wild</p>
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-muted dark:text-muted-dark">
+                  <Shuffle size={13} className="shrink-0" />
+                  <span className="truncate">
+                    <span className="font-bold text-ink dark:text-cream">{dealer.name}</span> deals {game.currentRound + 2} cards
+                  </span>
+                </p>
+              </div>
             </div>
           )}
-          <div className={`flex shrink-0 items-center gap-2 ${isComplete ? 'absolute right-0 top-0' : ''}`}>
+          <div className={`flex shrink-0 items-center gap-2 ${isComplete ? 'absolute right-0 top-0' : 'flex-col'}`}>
             <NavLink
               to="/play/new"
               aria-label="Start new game"
@@ -383,7 +404,7 @@ function LiveGame({ gameId }) {
       </div>
 
       <div>
-        <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
+        <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
           <ListOrdered size={13} />
           Standings
         </p>
@@ -395,15 +416,27 @@ function LiveGame({ gameId }) {
           draftRound={isComplete ? null : draftRound}
           dealerRound={isComplete ? null : game.currentRound}
         />
-        {!isComplete && game.players.length < MAX_PLAYERS && (
-          <button
-            type="button"
-            onClick={() => setAddingPlayer(true)}
-            className="press mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-2.5 text-sm font-semibold text-muted dark:border-ink-line dark:text-muted-dark"
-          >
-            <UserPlus size={16} />
-            Add player
-          </button>
+        {!isComplete && (
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setAddingPlayer(true)}
+              disabled={game.players.length >= MAX_PLAYERS}
+              className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-2.5 text-sm font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
+            >
+              <UserPlus size={16} />
+              Add player
+            </button>
+            <button
+              type="button"
+              onClick={() => setRemovingOpen(true)}
+              disabled={game.players.length <= MIN_PLAYERS}
+              className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-2.5 text-sm font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
+            >
+              <UserMinus size={16} />
+              Remove player
+            </button>
+          </div>
         )}
       </div>
 
@@ -411,7 +444,7 @@ function LiveGame({ gameId }) {
 
       {!isComplete && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">This round's scores</p>
+          <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">This round's scores</p>
           <ScoreEntryForm
             key={game.currentRound}
             players={game.players}
@@ -434,7 +467,7 @@ function LiveGame({ gameId }) {
 
       {chartRounds.length > 0 && (
         <div>
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
             <TrendingUp size={13} />
             The race {hasDraft && <span className="normal-case tracking-normal">· live preview</span>}
           </p>
@@ -446,7 +479,7 @@ function LiveGame({ gameId }) {
       )}
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>
+        <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>
         <ScorecardGrid players={game.players} rounds={game.rounds} onEditRound={setEditingRound} />
       </div>
 
@@ -511,6 +544,62 @@ function LiveGame({ gameId }) {
           </div>
         </div>
       )}
+
+      {removingOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 backdrop-blur-sm sm:items-center sm:p-4" onClick={() => setRemovingOpen(false)}>
+          <div className="card-elevated animate-sheet-up w-full max-w-sm rounded-t-3xl bg-parchment-panel p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] dark:bg-ink-panel sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="font-display text-2xl text-ink dark:text-cream">Who's leaving?</h2>
+            <p className="mt-1 text-sm text-muted dark:text-muted-dark">Their scores in this game are deleted, so it won't count in their stats.</p>
+            <ul className="mt-4 space-y-2">
+              {game.players.map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRemoveError(null);
+                      setRemovingPlayer(p);
+                    }}
+                    className="press flex w-full items-center gap-3 rounded-2xl border border-parchment-line p-3 text-left font-semibold text-ink dark:border-ink-line dark:text-cream"
+                  >
+                    <Avatar name={p.name} sizeClass="h-9 w-9 text-sm" />
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <UserMinus size={16} className="text-heart" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {removeError && <p className="mt-3 text-sm font-bold text-heart">{removeError}</p>}
+            <button type="button" onClick={() => setRemovingOpen(false)} className="press mt-4 w-full rounded-xl border border-parchment-line py-3 font-semibold text-ink dark:border-ink-line dark:text-cream">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {dealRound && (
+        <DealInterstitial
+          round={dealRound}
+          dealerName={dealerForRound(dealRound, game.players)?.name ?? ''}
+          onDone={() => setDealRound(null)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={Boolean(removingPlayer)}
+        title={`Remove ${removingPlayer?.name ?? ''}?`}
+        message="Every score they have in this game is deleted. Dealer order shifts for the rounds left."
+        confirmLabel="Remove"
+        onCancel={() => setRemovingPlayer(null)}
+        onConfirm={async () => {
+          try {
+            await removePlayerFromGame(game.id, removingPlayer.id);
+            setRemovingOpen(false);
+          } catch (err) {
+            setRemoveError(err.message ?? 'Failed to remove player');
+          }
+          setRemovingPlayer(null);
+        }}
+      />
 
       <ConfirmDialog
         open={confirmingUndo}

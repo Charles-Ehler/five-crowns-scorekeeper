@@ -10,7 +10,7 @@ export default function WinnerReveal({ game }) {
 
   return (
     <div className="relative flex flex-col items-center py-2 text-center">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold-deep dark:text-gold">
+      <p className="text-xs font-semibold text-gold-deep dark:text-gold">
         {winners.length > 1 ? 'Shared crown' : 'Wears the crown'}
       </p>
       <div className="mt-9 flex justify-center gap-6">

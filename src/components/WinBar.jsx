@@ -7,7 +7,7 @@ export default function WinBar({ title, entries, formatValue = (v) => v }) {
 
   return (
     <div className="card-elevated rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">{title}</p>
+      <p className="mb-3 text-sm font-semibold text-muted dark:text-muted-dark">{title}</p>
       <div className="space-y-2.5">
         {entries.map((entry) => {
           const suit = suitForName(entry.name);
