@@ -42,8 +42,8 @@ export default function History() {
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <h1 className="font-display text-2xl text-ink dark:text-cream">History</h1>
+    <div className="grid gap-3 p-4 md:grid-cols-2 md:p-6">
+      <h1 className="font-display text-2xl text-ink md:col-span-2 dark:text-cream">History</h1>
       {games.map((game) => {
         const totals = computeTotals(game.players, game.rounds);
         const winners = game.players.filter((p) => game.winnerIds?.includes(p.id));

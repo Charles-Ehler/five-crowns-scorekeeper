@@ -12,7 +12,7 @@ export default function BottomNav() {
   const activeIndex = Math.max(0, TABS.findIndex((t) => pathname.startsWith(t.to)));
 
   return (
-    <nav style={{ viewTransitionName: 'bottom-nav' }} className="fixed inset-x-0 bottom-0 z-30 border-t border-parchment-line bg-parchment-panel/95 backdrop-blur dark:border-ink-line dark:bg-ink-panel/95">
+    <nav style={{ viewTransitionName: 'bottom-nav' }} className="pb-[env(safe-area-inset-bottom)] fixed inset-x-0 bottom-0 z-30 border-t border-parchment-line bg-parchment-panel/95 backdrop-blur dark:border-ink-line dark:bg-ink-panel/95">
       <div className="relative mx-auto flex max-w-md gap-1 p-2">
         {/* One gold pill that slides to the active tab instead of each tab lighting up on its own. */}
         <span

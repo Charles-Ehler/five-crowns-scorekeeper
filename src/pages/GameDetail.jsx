@@ -113,7 +113,7 @@ export default function GameDetail() {
   const isComplete = game.status === 'complete';
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-4 md:p-6">
       <NavLink to="/history" className="inline-flex items-center gap-1 text-sm font-bold text-ink dark:text-cream">
         <ArrowLeft size={16} />
         Back to history
@@ -131,12 +131,14 @@ export default function GameDetail() {
           Continue game
         </NavLink>
       )}
-      {game.rounds.length > 0 ? (
-        <Replay game={game} />
-      ) : (
-        <PlayerTotals players={game.players} rounds={game.rounds} dealerRound={game.currentRound} />
-      )}
-      <ScorecardGrid players={game.players} rounds={game.rounds} />
+      <div className="space-y-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
+        {game.rounds.length > 0 ? (
+          <Replay game={game} />
+        ) : (
+          <PlayerTotals players={game.players} rounds={game.rounds} dealerRound={game.currentRound} />
+        )}
+        <ScorecardGrid players={game.players} rounds={game.rounds} />
+      </div>
     </div>
   );
 }

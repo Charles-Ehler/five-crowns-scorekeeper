@@ -142,7 +142,7 @@ export default function PlayerDetail() {
   const maxPlacementCount = Math.max(1, ...placementCounts.map((c) => c ?? 0));
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-4 md:p-6">
       <NavLink to="/stats" className="inline-flex items-center gap-1 text-sm font-bold text-ink dark:text-cream">
         <ArrowLeft size={16} />
         Back to stats
@@ -210,6 +210,7 @@ export default function PlayerDetail() {
         </div>
       </div>
 
+      <div className="space-y-6 md:grid md:grid-cols-2 md:items-end md:gap-6 md:space-y-0">
       {player.history.length >= 2 && (
         <section>
           <h2 className="mb-3 font-display text-xl text-ink dark:text-cream">Score trend</h2>
@@ -234,6 +235,7 @@ export default function PlayerDetail() {
           </div>
         </section>
       )}
+      </div>
 
       {(player.currentStreak >= 2 || player.longestStreak >= 2) && (
         <div className="flex gap-2.5">
@@ -287,7 +289,7 @@ export default function PlayerDetail() {
             <Trophy size={18} />
             Personal records
           </h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {player.bestRound && (
               <StatCard
                 icon={Gem}

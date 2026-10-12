@@ -101,7 +101,7 @@ export default function Stats() {
   const otherPairs = !isDuo ? stats.pairs.slice(1, 8) : [];
 
   return (
-    <div className="space-y-8 p-4">
+    <div className="space-y-8 p-4 md:p-6">
       <h1 className="font-display text-2xl text-ink dark:text-cream">Stats</h1>
 
       {/* Hero: podium leaderboard */}
@@ -118,6 +118,7 @@ export default function Stats() {
         </div>
       </section>
 
+      <div className="space-y-8 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
       <section>
         <SectionHeader icon={Activity}>Form guide</SectionHeader>
         <FormGuide players={byWins} />
@@ -160,11 +161,12 @@ export default function Stats() {
           </div>
         )}
       </section>
+      </div>
 
       {/* Records: grid of stat cards */}
       <section>
         <SectionHeader icon={Trophy}>Records</SectionHeader>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {stats.bestRound && (
             <StatCard
               icon={Gem}
@@ -283,7 +285,7 @@ export default function Stats() {
       {(stats.mostImproved || stats.closer || stats.bestComeback) && (
         <section>
           <SectionHeader icon={PartyPopper}>Fun Extras</SectionHeader>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {stats.mostImproved && (
               <StatCard
                 icon={Sparkles}

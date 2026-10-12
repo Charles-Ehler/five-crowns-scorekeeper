@@ -1,3 +1,6 @@
+// Named JSON import: only `version` ends up in the bundle, and Vite hot-reloads
+// it when `npm version` bumps package.json, so the header is never stale.
+import { version } from '../package.json';
 import { Navigate, useLocation, Route, Routes } from 'react-router-dom';
 import { Crown, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import BottomNav from './components/BottomNav.jsx';
@@ -18,11 +21,11 @@ export default function App() {
   return (
     <PlayerPhotosProvider>
       <div className="flex h-dvh flex-col overflow-hidden bg-parchment dark:bg-ink-deep">
-        <header style={{ viewTransitionName: 'app-header' }} className="sticky top-0 z-20 flex items-center justify-between border-b border-parchment-line bg-parchment/95 px-4 py-3 backdrop-blur dark:border-ink-line dark:bg-ink-deep/95">
+        <header style={{ viewTransitionName: 'app-header' }} className="sticky top-0 z-20 flex items-center justify-between border-b border-parchment-line bg-parchment/95 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur dark:border-ink-line dark:bg-ink-deep/95">
           <h1 className="flex items-baseline gap-1.5 font-display text-base text-ink dark:text-cream">
             <Crown size={18} className="mb-0.5 text-gold" fill="currentColor" />
             Five Crowns
-            <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted dark:text-muted-dark">v{__APP_VERSION__}</span>
+            <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted dark:text-muted-dark">v{version}</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -46,7 +49,7 @@ export default function App() {
         </header>
 
         <main className="table-glow flex-1 overflow-y-auto pb-24">
-          <div key={location.pathname} className="animate-page-in">
+          <div key={location.pathname} className="animate-page-in mx-auto w-full max-w-5xl">
             <Routes location={location}>
               <Route path="/" element={<Navigate to="/play" replace />} />
               <Route path="/play" element={<Play />} />

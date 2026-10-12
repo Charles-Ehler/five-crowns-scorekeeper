@@ -13,7 +13,7 @@ export default function PlayingCard({ round, size = 'md' }) {
   const suit = suitForIndex(round - 1);
   const rank = RANK_INDEX[round - 1];
   const color = `var(--color-${suit.key})`;
-  const dims = size === 'lg' ? 'h-[14rem] w-40 text-[1.4rem]' : 'h-[6.65rem] w-[4.75rem] text-[0.8rem]';
+  const dims = size === 'lg' ? 'h-[14rem] w-40 text-[1.4rem]' : 'h-[6.65rem] w-[4.75rem] text-[0.8rem] md:h-[9.1rem] md:w-[6.5rem] md:text-[1.1rem]';
 
   function handleMove(e) {
     const el = ref.current;

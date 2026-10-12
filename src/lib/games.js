@@ -19,7 +19,50 @@ const GAMES_COLLECTION = 'fiveCrowns_games';
 const PLAYERS_COLLECTION = 'fiveCrowns_players';
 const RECENT_PLAYERS_LIMIT = 30;
 
+// --- Practice games -------------------------------------------------------
+// A practice game lives only on this device (localStorage), never in
+// Firestore, so it can't reach History, Stats, or the recent-players list.
+// Every game function below checks the id and routes here, so the live game
+// screen works identically for both.
+const PRACTICE_PREFIX = 'practice-';
+const PRACTICE_KEY = 'fiveCrowns_practiceGame';
+const practiceListeners = new Set();
+
+export function isPracticeGame(gameId) {
+  return typeof gameId === 'string' && gameId.startsWith(PRACTICE_PREFIX);
+}
+
+// Timestamps are stored as epoch ms and handed out with the same
+// toDate()/toMillis() shape Firestore Timestamps have.
+function hydratePractice(raw) {
+  if (!raw) return null;
+  const ts = (ms) => (ms == null ? null : { toDate: () => new Date(ms), toMillis: () => ms });
+  return { ...raw, createdAt: ts(raw.createdAt), updatedAt: ts(raw.updatedAt), completedAt: ts(raw.completedAt) };
+}
+
+function readPractice(gameId) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PRACTICE_KEY));
+    return raw?.id === gameId ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePractice(raw) {
+  localStorage.setItem(PRACTICE_KEY, JSON.stringify(raw));
+  practiceListeners.forEach((fn) => fn(raw));
+}
+
+// --- Shared game access ----------------------------------------------------
+
 export function subscribeToGame(gameId, onChange, onError) {
+  if (isPracticeGame(gameId)) {
+    const listener = (raw) => onChange(raw?.id === gameId ? hydratePractice(raw) : null);
+    practiceListeners.add(listener);
+    onChange(hydratePractice(readPractice(gameId)));
+    return () => practiceListeners.delete(listener);
+  }
   return onSnapshot(
     doc(db, GAMES_COLLECTION, gameId),
     (snap) => {
@@ -29,8 +72,34 @@ export function subscribeToGame(gameId, onChange, onError) {
   );
 }
 
-export async function createGame(playerNames) {
+// Runs mutate(game, now) against the current game and applies the returned
+// fields. `now()` is a server timestamp for real games and epoch ms for
+// practice ones. Real games go through a transaction.
+async function updateGame(gameId, mutate) {
+  if (isPracticeGame(gameId)) {
+    const raw = readPractice(gameId);
+    if (!raw) throw new Error('Game not found');
+    const update = mutate(raw, () => Date.now());
+    if (update) writePractice({ ...raw, ...update });
+    return;
+  }
+  const ref = doc(db, GAMES_COLLECTION, gameId);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error('Game not found');
+    const update = mutate(snap.data(), serverTimestamp);
+    if (update) tx.update(ref, update);
+  });
+}
+
+export async function createGame(playerNames, { practice = false } = {}) {
   const players = playerNames.map((name) => ({ id: createPlayerId(), name }));
+  if (practice) {
+    const id = `${PRACTICE_PREFIX}${createPlayerId()}`;
+    const now = Date.now();
+    writePractice({ id, players, rounds: [], currentRound: 1, status: 'in_progress', winnerIds: [], createdAt: now, updatedAt: now, completedAt: null });
+    return id;
+  }
   const ref = await addDoc(collection(db, GAMES_COLLECTION), {
     players,
     rounds: [],
@@ -53,29 +122,18 @@ export async function createGame(playerNames) {
 export async function addPlayerToGame(gameId, name) {
   const trimmed = name.trim();
   if (!trimmed) return;
-  const ref = doc(db, GAMES_COLLECTION, gameId);
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error('Game not found');
-    const game = snap.data();
+  await updateGame(gameId, (game, now) => {
     if (game.players.length >= MAX_PLAYERS) throw new Error(`Games are capped at ${MAX_PLAYERS} players`);
-    tx.update(ref, {
-      players: [...game.players, { id: createPlayerId(), name: trimmed }],
-      updatedAt: serverTimestamp(),
-    });
+    return { players: [...game.players, { id: createPlayerId(), name: trimmed }], updatedAt: now() };
   });
-  await saveRecentPlayerName(trimmed);
+  if (!isPracticeGame(gameId)) await saveRecentPlayerName(trimmed);
 }
 
 // Leaving mid-game removes the player and every score they had in this game,
 // so a half-played game never counts toward their stats. Same full recompute
 // as round edits, so status and winners stay consistent.
 export async function removePlayerFromGame(gameId, playerId) {
-  const ref = doc(db, GAMES_COLLECTION, gameId);
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error('Game not found');
-    const game = snap.data();
+  await updateGame(gameId, (game, now) => {
     if (game.players.length <= MIN_PLAYERS) throw new Error(`Games need at least ${MIN_PLAYERS} players`);
     const players = game.players.filter((p) => p.id !== playerId);
     const rounds = game.rounds.map((r) => {
@@ -83,7 +141,7 @@ export async function removePlayerFromGame(gameId, playerId) {
       delete scores[playerId];
       return { ...r, scores };
     });
-    tx.update(ref, { players, ...buildRoundsUpdate({ ...game, players }, rounds) });
+    return { players, ...buildRoundsUpdate({ ...game, players }, rounds, now) };
   });
 }
 
@@ -92,41 +150,29 @@ export async function removePlayerFromGame(gameId, playerId) {
 // winners) from whichever rounds exist afterward, so there's no separate
 // "advance" vs "edit" branch to keep in sync.
 export async function submitRoundScores(gameId, roundNumber, scoresByPlayerId) {
-  const ref = doc(db, GAMES_COLLECTION, gameId);
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error('Game not found');
-    const game = snap.data();
-
+  await updateGame(gameId, (game, now) => {
     const rounds = game.rounds.filter((r) => r.roundNumber !== roundNumber);
     rounds.push({ roundNumber, scores: scoresByPlayerId });
     rounds.sort((a, b) => a.roundNumber - b.roundNumber);
-
-    tx.update(ref, buildRoundsUpdate(game, rounds));
+    return buildRoundsUpdate(game, rounds, now);
   });
 }
 
 export async function undoLastRound(gameId) {
-  const ref = doc(db, GAMES_COLLECTION, gameId);
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error('Game not found');
-    const game = snap.data();
-    if (game.rounds.length === 0) return;
-
+  await updateGame(gameId, (game, now) => {
+    if (game.rounds.length === 0) return null;
     const lastRoundNumber = Math.max(...game.rounds.map((r) => r.roundNumber));
     const rounds = game.rounds.filter((r) => r.roundNumber !== lastRoundNumber);
-
-    tx.update(ref, buildRoundsUpdate(game, rounds));
+    return buildRoundsUpdate(game, rounds, now);
   });
 }
 
-function buildRoundsUpdate(game, rounds) {
+function buildRoundsUpdate(game, rounds, now) {
   const complete = rounds.length === TOTAL_ROUNDS;
   const update = {
     rounds,
     currentRound: computeCurrentRound(rounds),
-    updatedAt: serverTimestamp(),
+    updatedAt: now(),
   };
 
   if (complete) {
@@ -134,7 +180,7 @@ function buildRoundsUpdate(game, rounds) {
     const lowest = Math.min(...Object.values(totals));
     update.status = 'complete';
     update.winnerIds = Object.keys(totals).filter((id) => totals[id] === lowest);
-    update.completedAt = game.completedAt ?? serverTimestamp();
+    update.completedAt = game.completedAt ?? now();
   } else {
     update.status = 'in_progress';
     update.winnerIds = [];
@@ -142,6 +188,12 @@ function buildRoundsUpdate(game, rounds) {
   }
 
   return update;
+}
+
+export function endPracticeGame(gameId) {
+  if (readPractice(gameId)) localStorage.removeItem(PRACTICE_KEY);
+  if (localStorage.getItem(CURRENT_GAME_KEY) === gameId) localStorage.removeItem(CURRENT_GAME_KEY);
+  practiceListeners.forEach((fn) => fn(null));
 }
 
 export async function deleteGame(gameId) {

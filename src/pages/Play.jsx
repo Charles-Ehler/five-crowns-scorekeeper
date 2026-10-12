@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, Layers, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserMinus, UserPlus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Dices, FlaskConical, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserMinus, UserPlus, X } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
 import DealInterstitial from '../components/DealInterstitial.jsx';
-import HandCounter from '../components/HandCounter.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import RaceChart from '../components/RaceChart.jsx';
 import PlayingCard from '../components/PlayingCard.jsx';
@@ -15,8 +14,9 @@ import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import ShareResultButton from '../components/ShareResultButton.jsx';
 import WinnerReveal from '../components/WinnerReveal.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
+import { useWakeLock } from '../hooks/useWakeLock.js';
 import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
-import { addPlayerToGame, createGame, removePlayerFromGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
+import { addPlayerToGame, createGame, endPracticeGame, isPracticeGame, removePlayerFromGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
 import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
@@ -42,9 +42,6 @@ function NewGameForm() {
   const [recentPlayers, setRecentPlayers] = useState([]);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(null);
-  // Practice hand counter: purely local state, never attached to a game, so
-  // nothing reaches Firestore or the stats.
-  const [practiceRound, setPracticeRound] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,12 +97,19 @@ function NewGameForm() {
     }
   }
 
-  async function handleStart() {
-    if (!canStart) return;
+  // A practice game uses the names entered, or the 4 most recent players when
+  // the form isn't filled in, so a demo is one tap away.
+  async function handleStart(practice = false) {
+    if (!practice && !canStart) return;
+    let playerNames = trimmed;
+    if (practice && !canStart) {
+      const recent = recentPlayers.slice(0, 4).map((r) => r.name);
+      playerNames = recent.length >= MIN_PLAYERS ? recent : ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+    }
     setStarting(true);
     setError(null);
     try {
-      const gameId = await createGame(trimmed);
+      const gameId = await createGame(playerNames, { practice });
       localStorage.setItem(CURRENT_GAME_KEY, gameId);
       navigate(`/play/${gameId}`);
     } catch (err) {
@@ -120,7 +124,7 @@ function NewGameForm() {
   );
 
   return (
-    <div className="space-y-5 p-4">
+    <div className="mx-auto max-w-xl space-y-5 p-4 md:p-8">
       <div>
         <h1 className="flex items-center gap-2 font-display text-2xl text-ink dark:text-cream">
           <Sparkles className="text-gold" size={20} />
@@ -216,7 +220,7 @@ function NewGameForm() {
 
       <button
         type="button"
-        onClick={handleStart}
+        onClick={() => handleStart()}
         disabled={!canStart || starting}
         className="press w-full rounded-2xl bg-gold py-3.5 font-display text-lg text-ink shadow-lg shadow-gold/20 disabled:opacity-40"
       >
@@ -225,29 +229,26 @@ function NewGameForm() {
 
       <button
         type="button"
-        onClick={() => setPracticeRound(1)}
-        className="press flex w-full items-center justify-center gap-1.5 rounded-2xl border border-parchment-line py-3 text-sm font-semibold text-muted dark:border-ink-line dark:text-muted-dark"
+        onClick={() => handleStart(true)}
+        disabled={starting}
+        className="press flex w-full flex-col items-center gap-0.5 rounded-2xl border border-parchment-line py-3 text-ink disabled:opacity-40 dark:border-ink-line dark:text-cream"
       >
-        <Layers size={16} />
-        Practice the hand counter
-        <span className="text-xs font-normal">· doesn't count</span>
+        <span className="flex items-center gap-1.5 font-semibold">
+          <FlaskConical size={16} />
+          Start a practice game
+        </span>
+        <span className="text-xs text-muted dark:text-muted-dark">
+          Not saved to History or Stats. {canStart ? 'Uses the players above.' : 'Uses 4 recent players.'}
+        </span>
       </button>
-
-      {practiceRound && (
-        <HandCounter
-          playerName="Practice hand"
-          roundNumber={practiceRound}
-          onRoundChange={setPracticeRound}
-          doneLabel="Done"
-          onDone={() => setPracticeRound(null)}
-          onCancel={() => setPracticeRound(null)}
-        />
-      )}
     </div>
   );
 }
 
 function LiveGame({ gameId }) {
+  const navigate = useNavigate();
+  const practice = isPracticeGame(gameId);
+  useWakeLock();
   const { enabled: feedbackEnabled } = useFeedback();
   const [game, setGame] = useState(undefined);
   const [error, setError] = useState(null);
@@ -339,6 +340,24 @@ function LiveGame({ gameId }) {
     }
   }
 
+  // Practice only: a plausible round so a demo can race to the finish. One
+  // player goes out; the rest hold a random number of points for the hand size.
+  function dealRandomRound() {
+    const handSize = game.currentRound + 2;
+    const outIndex = Math.floor(Math.random() * game.players.length);
+    const scores = {};
+    game.players.forEach((p, i) => {
+      const score = i === outIndex || Math.random() < 0.15 ? 0 : Math.floor(Math.random() * handSize * 5);
+      scores[p.id] = { score, wentOut: i === outIndex };
+    });
+    handleMainSubmit(scores);
+  }
+
+  function handleEndPractice() {
+    endPracticeGame(game.id);
+    navigate('/play/new');
+  }
+
   function closeAddPlayer() {
     setAddingPlayer(false);
     setNewPlayerName('');
@@ -356,7 +375,27 @@ function LiveGame({ gameId }) {
   }
 
   return (
-    <div className="relative space-y-6 p-4">
+    <div className="relative space-y-6 p-4 md:p-6">
+      {practice && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-gold/50 bg-gold/10 px-4 py-3">
+          <FlaskConical size={18} className="shrink-0 text-gold-deep dark:text-gold" />
+          <p className="min-w-0 flex-1 text-sm text-ink dark:text-cream">
+            <span className="font-bold">Practice game.</span> Nothing here is saved to History or Stats.
+          </p>
+          <div className="flex gap-2">
+            {!isComplete && (
+              <button type="button" onClick={dealRandomRound} className="press flex items-center gap-1.5 rounded-full bg-gold px-3 py-1.5 text-sm font-bold text-ink">
+                <Dices size={15} />
+                Deal random round
+              </button>
+            )}
+            <button type="button" onClick={handleEndPractice} className="press rounded-full border border-parchment-line px-3 py-1.5 text-sm font-semibold text-ink dark:border-ink-line dark:text-cream">
+              End practice
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={`card-elevated hero-sheen ${isComplete ? '' : 'sticky top-0'} z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel`}>
         {isComplete && <ConfettiBurst />}
         <div className="relative flex items-start justify-between">
@@ -368,8 +407,8 @@ function LiveGame({ gameId }) {
             <div className="flex min-w-0 flex-1 items-center gap-4">
               <PlayingCard key={game.currentRound} round={game.currentRound} />
               <div className="min-w-0">
-                <p className="font-display text-[2rem] font-bold leading-none text-ink dark:text-cream">{wildRankWordForRound(game.currentRound)}</p>
-                <p className="mt-0.5 font-display text-lg italic text-gold-deep dark:text-gold">are wild</p>
+                <p className="font-display text-[2rem] font-bold leading-none text-ink md:text-6xl dark:text-cream">{wildRankWordForRound(game.currentRound)}</p>
+                <p className="mt-0.5 font-display text-lg italic text-gold-deep md:text-2xl dark:text-gold">are wild</p>
                 <p className="mt-2 flex items-center gap-1.5 text-sm text-muted dark:text-muted-dark">
                   <Shuffle size={13} className="shrink-0" />
                   <span className="truncate">
@@ -388,14 +427,14 @@ function LiveGame({ gameId }) {
             >
               <Plus size={16} />
             </NavLink>
-            <button
+            {!practice && <button
               type="button"
               onClick={handleCopyLink}
               className="press flex items-center gap-1.5 rounded-full bg-muted/10 px-3 py-1.5 text-xs font-bold text-ink dark:bg-muted-dark/10 dark:text-cream"
             >
               {copied ? <Check size={14} /> : <Share2 size={14} />}
               {copied ? 'Copied!' : 'Share'}
-            </button>
+            </button>}
           </div>
         </div>
         <div className="relative mt-4">
@@ -403,7 +442,10 @@ function LiveGame({ gameId }) {
         </div>
       </div>
 
-      <div>
+      {/* iPad: standings + race on the left, score entry on the right. Phones
+          keep the single-column order: standings, entry, race. */}
+      <div className="space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
+      <div className="md:col-start-1 md:row-start-1">
         <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
           <ListOrdered size={13} />
           Standings
@@ -440,10 +482,14 @@ function LiveGame({ gameId }) {
         )}
       </div>
 
-      {isComplete && <ShareResultButton game={game} />}
+      {isComplete && (
+        <div className="md:col-start-2 md:row-start-1">
+          <ShareResultButton game={game} />
+        </div>
+      )}
 
       {!isComplete && (
-        <div>
+        <div className="md:col-start-2 md:row-span-2 md:row-start-1">
           <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">This round's scores</p>
           <ScoreEntryForm
             key={game.currentRound}
@@ -466,7 +512,7 @@ function LiveGame({ gameId }) {
       )}
 
       {chartRounds.length > 0 && (
-        <div>
+        <div className="md:col-start-1 md:row-start-2">
           <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
             <TrendingUp size={13} />
             The race {hasDraft && <span className="normal-case tracking-normal">· live preview</span>}
@@ -477,6 +523,7 @@ function LiveGame({ gameId }) {
           </div>
         </div>
       )}
+      </div>
 
       <div>
         <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>

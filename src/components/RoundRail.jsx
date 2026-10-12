@@ -12,7 +12,7 @@ export default function RoundRail({ rounds, currentRound, complete = false, onSe
       {Array.from({ length: TOTAL_ROUNDS }, (_, i) => i + 1).map((round) => {
         const isPlayed = played.has(round);
         const isCurrent = !complete && round === currentRound;
-        const base = 'flex aspect-[5/7] items-center justify-center rounded-md text-[11px] font-bold transition-all';
+        const base = 'flex aspect-[5/7] md:aspect-auto md:h-12 md:text-sm items-center justify-center rounded-md text-[11px] font-bold transition-all';
         const look = isCurrent
           ? 'bg-gold text-ink shadow-md shadow-gold/40 -translate-y-1 ring-2 ring-gold-bright animate-pulse-soft'
           : isPlayed
