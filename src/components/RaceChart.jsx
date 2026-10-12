@@ -20,7 +20,7 @@ function cumulativeSeries(players, rounds, upToRound) {
   });
 }
 
-// Cumulative score per player across the 11 rounds — a horse race where the
+// Cumulative score per player across the 11 rounds, a horse race where the
 // lowest line is winning. The x-axis is always the full game, so a replay or a
 // game in progress visibly "grows" toward Kings. Plain SVG, no chart library.
 export default function RaceChart({ players, rounds, upToRound }) {

@@ -1,4 +1,4 @@
-// Small synthesized tones via the Web Audio API — no audio files, no new
+// Small synthesized tones via the Web Audio API, no audio files, no new
 // dependency. A single shared AudioContext is created lazily on first use
 // (always from a user gesture, e.g. tapping "Next Round").
 let ctx = null;

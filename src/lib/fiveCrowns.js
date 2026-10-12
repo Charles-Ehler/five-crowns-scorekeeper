@@ -2,7 +2,7 @@ export const TOTAL_ROUNDS = 11;
 export const MIN_PLAYERS = 2;
 export const MAX_PLAYERS = 7;
 
-// Players think in card ranks, not round numbers — this is the primary label
+// Players think in card ranks, not round numbers, this is the primary label
 // everywhere a round is shown; the round number itself is secondary/internal.
 const RANK_WORDS = ['Threes', 'Fours', 'Fives', 'Sixes', 'Sevens', 'Eights', 'Nines', 'Tens', 'Jacks', 'Queens', 'Kings'];
 
@@ -48,9 +48,23 @@ export function sortPlayersByTotal(players, rounds) {
 }
 
 // Dealer rotates one seat per round, derived from the round number and the
-// players array's fixed (locked-at-creation) order — same pattern as
+// players array's fixed (locked-at-creation) order, same pattern as
 // wildRankForRound, no separate "dealer" field stored anywhere.
 export function dealerForRound(round, players) {
   if (!players.length) return null;
   return players[(round - 1) % players.length];
+}
+
+// Someone joining mid-game needs a score for each round they missed. Lowest
+// total wins, so 0 would hand them a head start. 'highest' (the default)
+// matches the worst hand at the table that round, 'average' the rounded mean,
+// 'zero' is the old no-penalty behavior.
+export const JOIN_FILL_MODES = ['highest', 'average', 'zero'];
+
+export function missedRoundScore(round, players, mode = 'highest') {
+  if (mode === 'zero') return 0;
+  const scores = players.map((p) => round.scores?.[p.id]?.score).filter((s) => typeof s === 'number');
+  if (!scores.length) return 0;
+  if (mode === 'average') return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+  return Math.max(...scores);
 }

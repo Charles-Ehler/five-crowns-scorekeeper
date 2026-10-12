@@ -1,7 +1,7 @@
 // Extracts the exact crop rectangle (from react-easy-crop's onCropComplete)
 // as a Blob. The output feeds straight into resizeImageToSquareJpeg, whose
 // own center-crop-to-square step becomes a no-op since the rect is already
-// square (aspect=1 is enforced in the crop UI) — so that function needs no
+// square (aspect=1 is enforced in the crop UI), so that function needs no
 // changes at all.
 export function getCroppedImageBlob(imageSrc, croppedAreaPixels) {
   return new Promise((resolve, reject) => {

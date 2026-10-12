@@ -7,7 +7,7 @@ import { computeTotals, dealerForRound } from '../lib/fiveCrowns.js';
 
 // draftRound lets the caller preview totals with the in-progress (unsaved)
 // round's scores overlaid, so the leader delta updates live as someone types
-// — without writing anything early. dealerRound is the round to show the
+//, without writing anything early. dealerRound is the round to show the
 // dealer marker for (omit/pass null once the game is complete).
 export default function PlayerTotals({
   players,

@@ -1,4 +1,4 @@
-// Five Crowns' five suits, used as the app's player-identity system — real
+// Five Crowns' five suits, used as the app's player-identity system, real
 // deck suits (spade/heart/diamond/club) plus the game's own 5th suit (star),
 // each with a fixed thematic color, rather than an arbitrary rainbow.
 export const SUITS = [

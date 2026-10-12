@@ -31,7 +31,7 @@ export default function ScoreEntryForm({
   // A player can join mid-game, which adds them to `players` without
   // remounting this form (same round, same key). `entries` state won't have
   // their id until this backfills it, so every read below goes through this
-  // merged view instead of the raw state — the effect keeps state itself in
+  // merged view instead of the raw state, the effect keeps state itself in
   // sync for edits, but rendering can't wait for the effect to run first.
   const safeEntries = {};
   players.forEach((p) => {
@@ -53,13 +53,13 @@ export default function ScoreEntryForm({
   const someoneWentOut = players.some((p) => safeEntries[p.id].wentOut);
   const scoresValid = players.every((p) => {
     const value = safeEntries[p.id].score;
-    // A blank score defaults to 0 at submit time, so it's not blocking — only
+    // A blank score defaults to 0 at submit time, so it's not blocking, only
     // a non-numeric or negative entry is.
     return value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0);
   });
   const allValid = someoneWentOut && scoresValid;
 
-  // Live preview only — lets the parent show leader-delta totals updating as
+  // Live preview only, lets the parent show leader-delta totals updating as
   // someone types, without writing anything until real submit.
   useEffect(() => {
     if (!onDraftChange || !roundNumber) return;
@@ -78,7 +78,7 @@ export default function ScoreEntryForm({
   }
 
   // Going out is always a 0-point round, and it's a common mis-tap to leave a
-  // stale number in the box after toggling this on — so lock the field instead
+  // stale number in the box after toggling this on, so lock the field instead
   // of just defaulting it, and hand control back with a clean slate if toggled
   // off. Only one player can go out per round, so turning it on for someone
   // else clears whoever had it before.

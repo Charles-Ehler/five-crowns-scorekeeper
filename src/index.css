@@ -51,7 +51,7 @@ button, a {
   touch-action: manipulation;
 }
 
-/* Soft elevation — a quiet drop shadow plus a hairline border, rather than
+/* Soft elevation, a quiet drop shadow plus a hairline border, rather than
    the hard offset block-shadow of a poster. Dark mode leans on the border
    more than the shadow, since shadows barely read against a dark panel. */
 .card-elevated {
@@ -102,7 +102,7 @@ button, a {
 }
 
 /* The signature moment: the round's corner-index card turns over to reveal
-   the next wild rank, echoing the one rule that defines Five Crowns — the
+   the next wild rank, echoing the one rule that defines Five Crowns, the
    wild rank climbs a step every round. */
 @keyframes card-flip-in {
   from {
@@ -303,4 +303,37 @@ button, a {
 @media (prefers-reduced-motion: reduce) {
   .animate-deal-card { animation: none; }
   .animate-deal-text { animation: none; opacity: 1; }
+}
+
+/* Stats dashboard: crowns pop in one by one as the tally loads (the page's
+   single orchestrated moment); record cards are pearl cards on the table. */
+@keyframes crown-pop {
+  0% { transform: scale(0) rotate(-25deg); opacity: 0; }
+  70% { transform: scale(1.25) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.animate-crown-pop {
+  opacity: 0;
+  animation: crown-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.record-card {
+  box-shadow:
+    0 0 0 1px rgba(18, 26, 51, 0.08),
+    0 10px 22px -10px rgba(12, 21, 48, 0.5),
+    0 2px 5px rgba(12, 21, 48, 0.15);
+  transition: transform 160ms ease-out;
+}
+.record-card:hover {
+  transform: translateY(-3px) rotate(-0.6deg);
+}
+@keyframes record-in {
+  from { opacity: 0; transform: translateY(14px) rotate(2deg); }
+  to { opacity: 1; transform: none; }
+}
+.animate-record-in {
+  animation: record-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-crown-pop { animation: none; opacity: 1; }
+  .animate-record-in { animation: none; }
 }

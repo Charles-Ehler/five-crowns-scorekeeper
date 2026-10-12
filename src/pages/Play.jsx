@@ -15,7 +15,7 @@ import ShareResultButton from '../components/ShareResultButton.jsx';
 import WinnerReveal from '../components/WinnerReveal.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
 import { useWakeLock } from '../hooks/useWakeLock.js';
-import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
+import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, missedRoundScore, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
 import { addPlayerToGame, createGame, endPracticeGame, isPracticeGame, removePlayerFromGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
 import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
@@ -259,6 +259,7 @@ function LiveGame({ gameId }) {
   const [addingPlayer, setAddingPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [addPlayerError, setAddPlayerError] = useState(null);
+  const [joinFill, setJoinFill] = useState('highest');
   const [removingOpen, setRemovingOpen] = useState(false);
   const [removingPlayer, setRemovingPlayer] = useState(null);
   const [removeError, setRemoveError] = useState(null);
@@ -285,7 +286,7 @@ function LiveGame({ gameId }) {
     lastRoundRef.current = game.currentRound;
   }, [game]);
 
-  // Someone else may have deleted this game from another device — without
+  // Someone else may have deleted this game from another device, without
   // this, the Play tab would keep bouncing back to a dead game every time
   // it's opened, since the "current game" pointer never gets cleared.
   useEffect(() => {
@@ -362,12 +363,13 @@ function LiveGame({ gameId }) {
     setAddingPlayer(false);
     setNewPlayerName('');
     setAddPlayerError(null);
+    setJoinFill('highest');
   }
 
   async function handleAddPlayer() {
     if (!newPlayerName.trim()) return;
     try {
-      await addPlayerToGame(game.id, newPlayerName);
+      await addPlayerToGame(game.id, newPlayerName, joinFill);
       closeAddPlayer();
     } catch (err) {
       setAddPlayerError(err.message ?? 'Failed to add player');
@@ -542,9 +544,38 @@ function LiveGame({ gameId }) {
               placeholder="Player name"
               className="card-elevated w-full rounded-2xl bg-parchment p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-deep dark:text-cream"
             />
-            <p className="mt-2 text-xs text-muted dark:text-muted-dark">
-              They join from this round onward — past rounds count as 0 for them.
-            </p>
+            {game.rounds.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm font-semibold text-ink dark:text-cream">
+                  Score for the {game.rounds.length} {game.rounds.length === 1 ? 'round' : 'rounds'} they missed
+                </p>
+                <div className="mt-2 grid grid-cols-3 gap-1 rounded-xl bg-muted/10 p-1 dark:bg-muted-dark/10" role="group">
+                  {[
+                    { key: 'highest', label: 'Highest' },
+                    { key: 'average', label: 'Average' },
+                    { key: 'zero', label: 'Zero' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setJoinFill(opt.key)}
+                      aria-pressed={joinFill === opt.key}
+                      className={`press rounded-lg py-2 text-sm font-semibold ${joinFill === opt.key ? 'bg-gold text-ink' : 'text-muted dark:text-muted-dark'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted dark:text-muted-dark">
+                  {joinFill === 'highest' && 'Fairest. They take the worst hand at the table each round, so joining late never helps.'}
+                  {joinFill === 'average' && 'Middle ground. They take the rounded average of everyone else each round.'}
+                  {joinFill === 'zero' && 'No penalty. Lowest score wins, so this gives them a head start.'}
+                </p>
+                <p className="mt-1 text-xs font-semibold text-ink dark:text-cream">
+                  They'd start on {game.rounds.reduce((sum, r) => sum + missedRoundScore(r, game.players, joinFill), 0)} points.
+                </p>
+              </div>
+            )}
             {addPlayerError && <p className="mt-2 text-sm font-bold text-heart">{addPlayerError}</p>}
             <div className="mt-4 flex gap-3">
               <button

@@ -7,8 +7,8 @@ const GOLD = '#F2B630';
 const MUTED = '#94A0C2';
 const ROW_HEIGHT = 78;
 
-// Draws a Royal Deck-style summary card to an offscreen canvas — deep ink
-// background, gold-foil accents — no html-to-image dependency, plain 2D
+// Draws a Royal Deck-style summary card to an offscreen canvas, deep ink
+// background, gold-foil accents, no html-to-image dependency, plain 2D
 // canvas drawing is enough to match the app's theme.
 export function generateShareImage(game) {
   const margin = 28;

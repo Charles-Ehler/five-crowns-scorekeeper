@@ -128,7 +128,7 @@ export default function PlayerDetail() {
           <ArrowLeft size={16} />
           Back to stats
         </NavLink>
-        <EmptyState title="Player not found" message={`No stats for "${decodedName}" — they may have been removed.`} />
+        <EmptyState title="Player not found" message={`No stats for "${decodedName}". They may have been removed.`} />
       </div>
     );
   }
@@ -372,7 +372,7 @@ export default function PlayerDetail() {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-ink dark:text-cream">
-                    vs {g.opponentNames.join(', ') || '—'}
+                    vs {g.opponentNames.join(', ') || 'nobody'}
                   </p>
                   <p className="text-xs text-muted dark:text-muted-dark">{formatDate(g.createdAt)}</p>
                 </div>

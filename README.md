@@ -4,7 +4,7 @@ A real-time score keeper for the card game Five Crowns. React + Tailwind + Fireb
 
 ## Design
 
-**Scorepad** — the app reads like a well-loved paper scorepad: cream ledger paper in light mode, a chalkboard flip-side in dark mode, hand-lettered round labels (Kalam) over clean tabular data (Inter/JetBrains Mono).
+**Scorepad**, the app reads like a well-loved paper scorepad: cream ledger paper in light mode, a chalkboard flip-side in dark mode, hand-lettered round labels (Kalam) over clean tabular data (Inter/JetBrains Mono).
 
 ## Setup
 
@@ -26,4 +26,4 @@ Deploys automatically to GitHub Pages on push to `main` via `.github/workflows/d
 `fiveCrowns_players/{playerId}`
 - `name`, `lastUsedAt`, `photoUrl`
 
-Wild rank, cards dealt, and dealer are all derived from the round number — nothing extra is stored for them. Scoring logic lives in `src/lib/fiveCrowns.js`, `games.js`, and `stats.js`.
+Wild rank, cards dealt, and dealer are all derived from the round number, nothing extra is stored for them. Scoring logic lives in `src/lib/fiveCrowns.js`, `games.js`, and `stats.js`.

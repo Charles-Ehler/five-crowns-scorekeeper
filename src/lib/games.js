@@ -12,7 +12,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
-import { MAX_PLAYERS, MIN_PLAYERS, TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId } from './fiveCrowns.js';
+import { MAX_PLAYERS, MIN_PLAYERS, TOTAL_ROUNDS, computeCurrentRound, computeTotals, createPlayerId, missedRoundScore } from './fiveCrowns.js';
 import { CURRENT_GAME_KEY } from './storageKeys.js';
 
 const GAMES_COLLECTION = 'fiveCrowns_games';
@@ -114,17 +114,21 @@ export async function createGame(playerNames, { practice = false } = {}) {
   return ref.id;
 }
 
-// Joining mid-game just appends to the players array — computeTotals already
-// treats a missing round.scores entry as 0, so past rounds don't need
-// backfilling. Dealer rotation (round % players.length) naturally shifts to
-// include the new seat going forward; that's the accepted tradeoff for not
-// storing a separate dealer field.
-export async function addPlayerToGame(gameId, name) {
+// Joining mid-game appends the player and gives them a score for every round
+// already played (see missedRoundScore). Dealer rotation (round %
+// players.length) shifts to include the new seat going forward; that's the
+// accepted tradeoff for not storing a separate dealer field.
+export async function addPlayerToGame(gameId, name, fillMode = 'highest') {
   const trimmed = name.trim();
   if (!trimmed) return;
   await updateGame(gameId, (game, now) => {
     if (game.players.length >= MAX_PLAYERS) throw new Error(`Games are capped at ${MAX_PLAYERS} players`);
-    return { players: [...game.players, { id: createPlayerId(), name: trimmed }], updatedAt: now() };
+    const id = createPlayerId();
+    const rounds = game.rounds.map((r) => ({
+      ...r,
+      scores: { ...r.scores, [id]: { score: missedRoundScore(r, game.players, fillMode), wentOut: false } },
+    }));
+    return { players: [...game.players, { id, name: trimmed }], rounds, updatedAt: now() };
   });
   if (!isPracticeGame(gameId)) await saveRecentPlayerName(trimmed);
 }

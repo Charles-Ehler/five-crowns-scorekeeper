@@ -4,7 +4,7 @@ import { ZoomIn, ZoomOut } from 'lucide-react';
 
 // Circular crop shape to match the Avatar component (always rounded-full)
 // everywhere else in the app. react-easy-crop handles drag-to-reposition and
-// pinch/wheel-to-zoom internally — no hand-rolled gesture math.
+// pinch/wheel-to-zoom internally, no hand-rolled gesture math.
 export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);

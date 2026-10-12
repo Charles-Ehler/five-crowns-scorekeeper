@@ -14,14 +14,14 @@ function emptyPlayerStat(name) {
     wins: 0,
     losses: 0,
     gameTotals: [],
-    timeline: [], // { createdAtMs, won, total } — chronological, for streaks + most-improved
+    timeline: [], // { createdAtMs, won, total }, chronological, for streaks + most-improved
     wentOutCount: 0,
     roundsPlayed: 0,
     bestRound: null,
     worstRound: null,
     bestGame: null,
     worstGame: null,
-    history: [], // { gameId, createdAt, total, placement, won, opponentNames } — for the player detail page
+    history: [], // { gameId, createdAt, total, placement, won, opponentNames }, for the player detail page
   };
 }
 
@@ -74,7 +74,7 @@ export function computeStats(games) {
   let worstRound = null;
   // Biggest gap closed between a player's worst round (relative to the rest
   // of the table that round) and their final placement (relative to the
-  // winner) — a rough but self-contained "comeback" measure.
+  // winner), a rough but self-contained "comeback" measure.
   let bestComeback = null;
 
   for (const game of completed) {
@@ -164,8 +164,8 @@ export function computeStats(games) {
       });
     }
 
-    // Pairwise record for every two players who shared this game — not just
-    // strict 2-player games — so nemesis/head-to-head work in group games too.
+    // Pairwise record for every two players who shared this game, not just
+    // strict 2-player games, so nemesis/head-to-head work in group games too.
     for (let i = 0; i < game.players.length; i += 1) {
       for (let j = i + 1; j < game.players.length; j += 1) {
         const a = game.players[i];

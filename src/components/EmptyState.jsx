@@ -1,4 +1,4 @@
-// Simple inline SVG illustration (a fanned hand of cards) — no image
+// Simple inline SVG illustration (a fanned hand of cards), no image
 // assets, just a handful of paths, used for empty History/Stats states.
 function CardsIllustration() {
   return (

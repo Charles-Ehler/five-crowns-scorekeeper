@@ -7,7 +7,7 @@ const PlayerPhotosContext = createContext({});
 
 // One shared real-time listener on fiveCrowns_players for the whole app,
 // instead of every avatar-rendering component fetching/subscribing on its
-// own — photo uploads/removals show up live everywhere immediately.
+// own, photo uploads/removals show up live everywhere immediately.
 export function PlayerPhotosProvider({ children }) {
   const [photos, setPhotos] = useState({});
 

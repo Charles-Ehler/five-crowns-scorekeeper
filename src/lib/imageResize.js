@@ -22,7 +22,7 @@ function canvasToBlob(canvas, quality) {
 }
 
 // Center-crops to a square, downscales to a fixed display size, and
-// compresses as JPEG — stepping quality down until it clears the target
+// compresses as JPEG, stepping quality down until it clears the target
 // byte size. Plain canvas, no cropping/resize library.
 export async function resizeImageToSquareJpeg(file) {
   const img = await loadImage(file);

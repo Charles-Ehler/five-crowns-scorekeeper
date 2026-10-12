@@ -3,7 +3,7 @@ import { usePlayerPhoto } from '../contexts/PlayerPhotosContext.jsx';
 import { suitForName } from '../lib/suits.js';
 
 // Photo if the player has uploaded one, otherwise a hash-based initials
-// circle — sizeClass is the caller's exact Tailwind size (h-9 w-9 text-sm,
+// circle, sizeClass is the caller's exact Tailwind size (h-9 w-9 text-sm,
 // etc.) so this is a drop-in swap wherever an avatar renders. The small suit
 // pip in the corner is the player's fixed identity mark (deck suit, not an
 // arbitrary color), visible even on an uploaded photo.

@@ -8,7 +8,7 @@ function formatDate(timestamp) {
   return timestamp.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// Tappable — expands to the shared match history between this pair.
+// Tappable, expands to the shared match history between this pair.
 export default function RivalryCard({ pair, featured = false }) {
   const [expanded, setExpanded] = useState(false);
   const [a, b] = pair.wins;
