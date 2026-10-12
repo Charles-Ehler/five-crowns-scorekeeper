@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, ListOrdered, PartyPopper, Plus, Shuffle, Sparkles, Share2, Undo2, UserPlus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserPlus, X } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
+import RaceChart from '../components/RaceChart.jsx';
 import RoundCornerCard from '../components/RoundCornerCard.jsx';
+import RoundRail from '../components/RoundRail.jsx';
 import ScoreEntryForm from '../components/ScoreEntryForm.jsx';
 import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import ShareResultButton from '../components/ShareResultButton.jsx';
+import WinnerReveal from '../components/WinnerReveal.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
 import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
 import { addPlayerToGame, createGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
@@ -270,9 +273,11 @@ function LiveGame({ gameId }) {
   const editingRoundData = editingRound
     ? game.rounds.find((r) => r.roundNumber === editingRound)?.scores
     : null;
-  const progressPct = Math.round((game.currentRound - 1) / TOTAL_ROUNDS * 100);
   const dealer = dealerForRound(game.currentRound, game.players);
   const editingDealer = editingRound ? dealerForRound(editingRound, game.players) : null;
+  // The form reports a draft from mount, so only overlay it once something was entered.
+  const hasDraft = !isComplete && draftRound && Object.values(draftRound.scores).some((e) => e.score > 0 || e.wentOut);
+  const chartRounds = hasDraft ? [...game.rounds, draftRound] : game.rounds;
 
   async function handleCopyLink() {
     await navigator.clipboard.writeText(window.location.href);
@@ -309,35 +314,26 @@ function LiveGame({ gameId }) {
 
   return (
     <div className="relative space-y-6 p-4">
-      <div className="card-elevated sticky top-0 z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel">
+      <div className={`card-elevated hero-sheen ${isComplete ? '' : 'sticky top-0'} z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel`}>
         {isComplete && <ConfettiBurst />}
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex items-start justify-between">
           {isComplete ? (
-            <h1 className="flex items-center gap-2 font-display text-xl text-ink dark:text-cream">
-              <PartyPopper className="text-gold" size={24} />
-              Game complete
-            </h1>
+            <div className="flex-1 pt-10">
+              <WinnerReveal game={game} />
+            </div>
           ) : (
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <p className="mb-1.5 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wide text-muted dark:text-muted-dark">
                 <Shuffle size={14} />
                 Dealer: <span className="normal-case text-base text-ink dark:text-cream">{dealer.name}</span>
               </p>
               <RoundCornerCard key={game.currentRound} round={game.currentRound} wildRankWord={wildRankWordForRound(game.currentRound)} />
-              <div className="mt-2.5 flex items-center gap-2">
-                <div className="h-2 w-full max-w-[200px] overflow-hidden rounded-full bg-parchment-line dark:bg-ink-line">
-                  <div
-                    className="h-full rounded-full bg-gold transition-all duration-500"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-                <span className="shrink-0 text-xs font-bold text-muted dark:text-muted-dark">
-                  Round {game.currentRound} of {TOTAL_ROUNDS}
-                </span>
-              </div>
+              <p className="mt-2 text-xs font-bold text-muted dark:text-muted-dark">
+                Round {game.currentRound} of {TOTAL_ROUNDS} · {game.currentRound + 2} cards each
+              </p>
             </div>
           )}
-          <div className="flex shrink-0 items-center gap-2">
+          <div className={`flex shrink-0 items-center gap-2 ${isComplete ? 'absolute right-0 top-0' : ''}`}>
             <NavLink
               to="/play/new"
               aria-label="Start new game"
@@ -355,6 +351,9 @@ function LiveGame({ gameId }) {
               {copied ? 'Copied!' : 'Share'}
             </button>
           </div>
+        </div>
+        <div className="relative mt-4">
+          <RoundRail rounds={game.rounds} currentRound={game.currentRound} complete={isComplete} onSelect={setEditingRound} />
         </div>
       </div>
 
@@ -405,6 +404,19 @@ function LiveGame({ gameId }) {
             <Undo2 size={15} />
             Undo last entry
           </button>
+        </div>
+      )}
+
+      {chartRounds.length > 0 && (
+        <div>
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">
+            <TrendingUp size={13} />
+            The race {hasDraft && <span className="normal-case tracking-normal">· live preview</span>}
+          </p>
+          <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
+            <RaceChart players={game.players} rounds={chartRounds} />
+            <p className="mt-1 text-center text-[11px] text-muted dark:text-muted-dark">Lowest line wins</p>
+          </div>
         </div>
       )}
 

@@ -1,3 +1,6 @@
+import { useLayoutEffect, useRef } from 'react';
+import { Crown } from 'lucide-react';
+import AnimatedNumber from './AnimatedNumber.jsx';
 import Avatar from './Avatar.jsx';
 import DealerBadge from './DealerBadge.jsx';
 import { computeTotals, dealerForRound } from '../lib/fiveCrowns.js';
@@ -21,8 +24,27 @@ export default function PlayerTotals({
   const hasScores = previewRounds.length > 0;
   const dealer = dealerRound ? dealerForRound(dealerRound, players) : null;
 
+  // FLIP: when the order changes, each row slides from where it was to where
+  // it now sits, instead of the list snapping. Web Animations API, no library.
+  const rowRefs = useRef(new Map());
+  const prevTops = useRef(new Map());
+  useLayoutEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    rowRefs.current.forEach((el, id) => {
+      const top = el.offsetTop;
+      const prev = prevTops.current.get(id);
+      if (!reduceMotion && prev !== undefined && prev !== top) {
+        el.animate([{ transform: `translateY(${prev - top}px)` }, { transform: 'none' }], {
+          duration: 420,
+          easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        });
+      }
+      prevTops.current.set(id, top);
+    });
+  });
+
   return (
-    <ol className="space-y-2">
+    <ol className="relative space-y-2">
       {sorted.map((p, i) => {
         const isWinner = winnerIds.includes(p.id);
         const isLeader = !complete && hasScores && totals[p.id] === lowestTotal;
@@ -31,6 +53,10 @@ export default function PlayerTotals({
         return (
           <li
             key={p.id}
+            ref={(el) => {
+              if (el) rowRefs.current.set(p.id, el);
+              else rowRefs.current.delete(p.id);
+            }}
             className={[
               'card-elevated flex items-center gap-3 rounded-2xl p-3',
               isWinner
@@ -53,11 +79,11 @@ export default function PlayerTotals({
                   isWinner ? 'bg-gold text-ink' : 'bg-gold/25 text-gold-deep dark:text-gold',
                 ].join(' ')}
               >
-                {isWinner ? '✓' : '●'}
+                {isWinner ? '✓' : <Crown size={12} fill="currentColor" />}
               </span>
             )}
             <span className="flex flex-col items-end">
-              <span className="text-xl font-extrabold tabular-nums text-ink dark:text-cream">{totals[p.id]}</span>
+              <span className="text-xl font-extrabold tabular-nums text-ink dark:text-cream"><AnimatedNumber value={totals[p.id]} /></span>
               {!highlighted && behindLeader > 0 && (
                 <span className="text-[11px] font-bold text-muted dark:text-muted-dark">
                   +{behindLeader} behind

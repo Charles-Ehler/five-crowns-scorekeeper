@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
+  Activity,
   CloudRain,
   Flag,
   Flame,
@@ -19,7 +20,9 @@ import {
   Zap,
 } from 'lucide-react';
 import EmptyState from '../components/EmptyState.jsx';
+import FormGuide from '../components/FormGuide.jsx';
 import Leaderboard from '../components/Leaderboard.jsx';
+import MatchupPicker from '../components/MatchupPicker.jsx';
 import RivalryCard from '../components/RivalryCard.jsx';
 import StatCard from '../components/StatCard.jsx';
 import WinBar from '../components/WinBar.jsx';
@@ -115,9 +118,19 @@ export default function Stats() {
         </div>
       </section>
 
+      <section>
+        <SectionHeader icon={Activity}>Form guide</SectionHeader>
+        <FormGuide players={byWins} />
+      </section>
+
       {/* Rivalries: the fan favorites */}
       <section>
         <SectionHeader icon={Swords}>Rivalries</SectionHeader>
+        {stats.players.length > 1 && (
+          <div className="mb-3">
+            <MatchupPicker players={byWins} pairs={stats.pairs} />
+          </div>
+        )}
         <div className="space-y-2.5">
           {isDuo && duoPair && <RivalryCard pair={duoPair} featured />}
           {!isDuo && featuredPair && <RivalryCard pair={featuredPair} featured />}

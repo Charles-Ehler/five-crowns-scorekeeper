@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Layers } from 'lucide-react';
 import Avatar from './Avatar.jsx';
+import HandCounter from './HandCounter.jsx';
 
 function initialEntries(players, initialData) {
   const entries = {};
@@ -25,6 +26,7 @@ export default function ScoreEntryForm({
 }) {
   const [entries, setEntries] = useState(() => initialEntries(players, initialData));
   const inputRefs = useRef({});
+  const [countingPlayerId, setCountingPlayerId] = useState(null);
 
   // A player can join mid-game, which adds them to `players` without
   // remounting this form (same round, same key). `entries` state won't have
@@ -142,15 +144,28 @@ export default function ScoreEntryForm({
               type="button"
               onClick={() => toggleWentOut(p.id)}
               className={[
-                'press flex shrink-0 items-center gap-1 rounded-full px-3 py-2 text-xs font-bold',
+                'press flex shrink-0 items-center gap-1 rounded-full px-2.5 py-2 text-xs font-bold',
                 wentOut
                   ? 'bg-heart text-cream'
                   : 'bg-muted/10 text-muted dark:bg-muted-dark/10 dark:text-muted-dark',
               ].join(' ')}
             >
               {wentOut && <Check size={14} />}
-              Went out
+              <span className="min-[400px]:hidden">Out</span>
+              <span className="hidden min-[400px]:inline">Went out</span>
             </button>
+            {roundNumber && (
+              <button
+                type="button"
+                onClick={() => setCountingPlayerId(p.id)}
+                disabled={wentOut}
+                aria-label={`Count ${p.name}'s hand`}
+                title="Count hand"
+                className="press flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/10 text-ink disabled:opacity-25 dark:bg-muted-dark/10 dark:text-cream"
+              >
+                <Layers size={17} />
+              </button>
+            )}
             <input
               ref={(el) => {
                 inputRefs.current[p.id] = el;
@@ -199,6 +214,17 @@ export default function ScoreEntryForm({
           {submitLabel}
         </button>
       </div>
+      {countingPlayerId && (
+        <HandCounter
+          playerName={players.find((p) => p.id === countingPlayerId)?.name ?? ''}
+          roundNumber={roundNumber}
+          onCancel={() => setCountingPlayerId(null)}
+          onDone={(total) => {
+            updateScore(countingPlayerId, String(total));
+            setCountingPlayerId(null);
+          }}
+        />
+      )}
     </form>
   );
 }

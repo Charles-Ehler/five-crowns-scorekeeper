@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { usePlayerPhoto } from '../contexts/PlayerPhotosContext.jsx';
 import { suitForName } from '../lib/suits.js';
 
@@ -10,13 +11,18 @@ export default function Avatar({ name, sizeClass, className = '' }) {
   const photoUrl = usePlayerPhoto(name);
   const suit = suitForName(name);
   const trimmed = name.trim();
+  // A stale photo URL (e.g. from an old storage bucket) falls back to initials
+  // instead of a broken-image icon.
+  const [failedUrl, setFailedUrl] = useState(null);
+  const showPhoto = photoUrl && photoUrl !== failedUrl;
 
   return (
     <span className={`relative inline-flex shrink-0 ${sizeClass} ${className}`}>
-      {photoUrl ? (
+      {showPhoto ? (
         <img
           src={photoUrl}
           alt={trimmed}
+          onError={() => setFailedUrl(photoUrl)}
           className="h-full w-full rounded-full object-cover ring-2 ring-parchment dark:ring-ink-deep"
         />
       ) : (

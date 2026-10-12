@@ -19,7 +19,7 @@ export default function RoundCornerCard({ round, wildRankWord }) {
           {suit.symbol}
         </span>
       </div>
-      <p className="font-display text-4xl text-ink dark:text-cream">{wildRankWord}</p>
+      <p className="min-w-0 font-display text-3xl text-ink min-[400px]:text-4xl dark:text-cream">{wildRankWord}</p>
     </div>
   );
 }

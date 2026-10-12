@@ -21,6 +21,7 @@ import EmptyState from '../components/EmptyState.jsx';
 import PhotoCropModal from '../components/PhotoCropModal.jsx';
 import RivalryCard from '../components/RivalryCard.jsx';
 import StatCard from '../components/StatCard.jsx';
+import TrendChart from '../components/TrendChart.jsx';
 import { usePlayerPhoto } from '../contexts/PlayerPhotosContext.jsx';
 import { getCroppedImageBlob } from '../lib/imageCrop.js';
 import { listGames } from '../lib/games.js';
@@ -134,6 +135,11 @@ export default function PlayerDetail() {
 
   const pairs = stats.pairs.filter((pair) => pair.names.some((n) => playerKey(n) === playerKey(player.name)));
   const winRate = player.gamesPlayed ? Math.round((player.wins / player.gamesPlayed) * 100) : 0;
+  const placementCounts = [];
+  player.history.forEach((g) => {
+    placementCounts[g.placement - 1] = (placementCounts[g.placement - 1] ?? 0) + 1;
+  });
+  const maxPlacementCount = Math.max(1, ...placementCounts.map((c) => c ?? 0));
 
   return (
     <div className="space-y-6 p-4">
@@ -203,6 +209,31 @@ export default function PlayerDetail() {
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Avg score</span>
         </div>
       </div>
+
+      {player.history.length >= 2 && (
+        <section>
+          <h2 className="mb-3 font-display text-xl text-ink dark:text-cream">Score trend</h2>
+          <TrendChart name={player.name} history={player.history} average={player.average} />
+        </section>
+      )}
+
+      {placementCounts.length > 1 && (
+        <section className="card-elevated rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted dark:text-muted-dark">Where they finish</p>
+          <div className="flex h-28 items-end gap-2">
+            {Array.from(placementCounts, (c) => c ?? 0).map((count, i) => (
+              <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                <span className="text-xs font-bold tabular-nums text-ink dark:text-cream">{count}</span>
+                <div
+                  className={`w-full rounded-t-md ${i === 0 ? 'bg-gold' : 'bg-muted/25 dark:bg-muted-dark/25'}`}
+                  style={{ height: `${Math.max(4, (count / maxPlacementCount) * 72)}px` }}
+                />
+                <span className="text-[11px] font-semibold text-muted dark:text-muted-dark">{i === 0 ? '1st' : `#${i + 1}`}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {(player.currentStreak >= 2 || player.longestStreak >= 2) && (
         <div className="flex gap-2.5">

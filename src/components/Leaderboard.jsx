@@ -25,7 +25,7 @@ export default function Leaderboard({ players }) {
             >
               <div className="relative">
                 <Crown size={style.size} className={`absolute -top-3.5 left-1/2 -translate-x-1/2 ${style.crown}`} fill="currentColor" />
-                <Avatar name={p.name} sizeClass={`h-14 w-14 text-lg ring-2 ${style.ring}`} />
+                <Avatar name={p.name} sizeClass={`h-14 w-14 text-lg rounded-full ring-2 ${style.ring}`} />
               </div>
               <p className="mt-2 max-w-[5.5rem] truncate text-center text-sm font-bold text-ink dark:text-cream">{p.name}</p>
               <p className="text-xs text-muted dark:text-muted-dark">
