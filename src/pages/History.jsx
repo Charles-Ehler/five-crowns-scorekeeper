@@ -124,6 +124,13 @@ function GameCard({ game, highlight }) {
           </span>
         )}
       </NavLink>
+      {/* The live screen has no delete, so unfinished games need a way to the
+          game page (where Delete lives) for games started by mistake. */}
+      {!complete && (
+        <NavLink to={`/history/${game.id}`} viewTransition className="mt-2 block text-center text-sm font-semibold text-muted underline-offset-2 hover:underline dark:text-muted-dark">
+          Details or delete
+        </NavLink>
+      )}
     </article>
   );
 }

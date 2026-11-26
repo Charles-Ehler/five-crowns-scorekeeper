@@ -20,7 +20,7 @@ export default function WinnerReveal({ game }) {
               <Crown
                 size={34}
                 fill="currentColor"
-                className="animate-crown-drop absolute -top-7 left-1/2 -translate-x-1/2 text-gold drop-shadow-[0_2px_6px_rgba(212,169,74,0.6)]"
+                className="animate-crown-drop absolute -top-7 left-1/2 text-gold drop-shadow-[0_2px_6px_rgba(212,169,74,0.6)]"
                 style={{ animationDelay: `${300 + i * 150}ms` }}
               />
               <Avatar name={w.name} sizeClass="h-20 w-20 text-3xl ring-4 ring-gold rounded-full" className="animate-pop-in" />

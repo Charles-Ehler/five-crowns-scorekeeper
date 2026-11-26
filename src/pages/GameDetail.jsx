@@ -90,6 +90,7 @@ export default function GameDetail() {
   const [game, setGame] = useState(undefined);
   const [error, setError] = useState(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -181,6 +182,7 @@ export default function GameDetail() {
           <Trash2 size={14} />
           Delete this game
         </button>
+        {deleteError && <p role="alert" className="mt-2 text-sm font-bold text-heart">Not deleted: {deleteError}</p>}
       </div>
 
       <ConfirmDialog
@@ -190,8 +192,13 @@ export default function GameDetail() {
         confirmLabel="Delete game"
         onCancel={() => setConfirmingDelete(false)}
         onConfirm={async () => {
-          await deleteGame(game.id);
-          navigate('/history', { replace: true });
+          try {
+            await deleteGame(game.id);
+            navigate('/history', { replace: true });
+          } catch (err) {
+            setConfirmingDelete(false);
+            setDeleteError(err?.message ?? 'Could not delete');
+          }
         }}
       />
     </div>
