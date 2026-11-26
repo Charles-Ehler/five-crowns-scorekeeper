@@ -27,6 +27,8 @@ export default function ScoreEntryForm({
   const [entries, setEntries] = useState(() => initialEntries(players, initialData));
   const inputRefs = useRef({});
   const [countingPlayerId, setCountingPlayerId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // A player can join mid-game, which adds them to `players` without
   // remounting this form (same round, same key). `entries` state won't have
@@ -115,9 +117,11 @@ export default function ScoreEntryForm({
     focusNextInput(index);
   }
 
-  function handleSubmit(e) {
+  // Stays on screen with the numbers intact if the save fails (no Wi-Fi at
+  // the table), and can't be double-tapped while a save is in flight.
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!allValid) return;
+    if (!allValid || submitting) return;
     const scoresByPlayerId = {};
     players.forEach((p) => {
       const value = safeEntries[p.id].score;
@@ -126,7 +130,15 @@ export default function ScoreEntryForm({
         wentOut: safeEntries[p.id].wentOut,
       };
     });
-    onSubmit(scoresByPlayerId);
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await onSubmit(scoresByPlayerId);
+    } catch (err) {
+      setSubmitError(err?.message ?? 'Could not save this round');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -196,6 +208,12 @@ export default function ScoreEntryForm({
         </p>
       )}
 
+      {submitError && (
+        <p role="alert" className="rounded-xl bg-heart/10 px-3 py-2 text-center text-sm font-bold text-heart">
+          Not saved: {submitError}. Check the connection and try again.
+        </p>
+      )}
+
       <div className="flex gap-3 pt-1">
         {onCancel && (
           <button
@@ -208,10 +226,10 @@ export default function ScoreEntryForm({
         )}
         <button
           type="submit"
-          disabled={!allValid}
+          disabled={!allValid || submitting}
           className="press flex-1 rounded-xl bg-gold py-3 font-bold text-ink disabled:opacity-40"
         >
-          {submitLabel}
+          {submitting ? 'Saving…' : submitLabel}
         </button>
       </div>
       {countingPlayerId && (

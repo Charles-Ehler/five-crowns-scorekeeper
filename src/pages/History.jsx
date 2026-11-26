@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Crown, Play, Trash2 } from 'lucide-react';
+import { Crown, Play } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
-import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { TOTAL_ROUNDS } from '../lib/fiveCrowns.js';
-import { deleteGame, listGames } from '../lib/games.js';
+import { listGames } from '../lib/games.js';
 import { formatDate, summarizeGame, timestampMs } from '../lib/gameSummary.js';
 import { playerKey } from '../lib/stats.js';
 import { suitForName } from '../lib/suits.js';
@@ -59,7 +58,7 @@ function DateCard({ ts }) {
   );
 }
 
-function GameCard({ game, onDelete, highlight }) {
+function GameCard({ game, highlight }) {
   const { ranked, winners, margin } = summarizeGame(game);
   const complete = game.status === 'complete';
   const maxTotal = Math.max(1, ...ranked.map((r) => r.total));
@@ -68,17 +67,8 @@ function GameCard({ game, onDelete, highlight }) {
 
   return (
     <article className="card-elevated animate-record-in relative rounded-3xl bg-parchment-panel p-4 dark:bg-ink-panel">
-      <button
-        type="button"
-        onClick={() => onDelete(game.id)}
-        aria-label="Delete game"
-        className="press absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-muted hover:bg-heart/10 hover:text-heart dark:text-muted-dark"
-      >
-        <Trash2 size={15} />
-      </button>
-
       <NavLink to={complete ? `/history/${game.id}` : `/play/${game.id}`} viewTransition className="block">
-        <div className="flex items-center gap-3 pr-8">
+        <div className="flex items-center gap-3">
           <DateCard ts={game.createdAt} />
           {complete ? (
             <div className="flex min-w-0 items-center gap-3">
@@ -151,7 +141,6 @@ function GameCard({ game, onDelete, highlight }) {
 export default function History() {
   const [games, setGames] = useState(undefined);
   const [error, setError] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
   const [player, setPlayer] = useState(null);
 
   useEffect(() => {
@@ -159,12 +148,6 @@ export default function History() {
       .then(setGames)
       .catch((err) => setError(err.message));
   }, []);
-
-  async function handleDelete() {
-    await deleteGame(deletingId);
-    setGames((prev) => prev.filter((g) => g.id !== deletingId));
-    setDeletingId(null);
-  }
 
   if (error) return <div className="p-4 font-bold text-heart">Couldn't load history: {error}</div>;
   if (games === undefined) return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
@@ -233,7 +216,7 @@ export default function History() {
           <h2 className="mb-3 font-display text-2xl font-bold text-ink dark:text-cream">Unfinished</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {unfinished.map((g) => (
-              <GameCard key={g.id} game={g} onDelete={setDeletingId} highlight={player} />
+              <GameCard key={g.id} game={g} highlight={player} />
             ))}
           </div>
         </section>
@@ -249,22 +232,13 @@ export default function History() {
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
             {m.games.map((g) => (
-              <GameCard key={g.id} game={g} onDelete={setDeletingId} highlight={player} />
+              <GameCard key={g.id} game={g} highlight={player} />
             ))}
           </div>
         </section>
       ))}
 
       {visible.length === 0 && <p className="text-muted dark:text-muted-dark">No games with {playerName} yet.</p>}
-
-      <ConfirmDialog
-        open={Boolean(deletingId)}
-        title="Delete this game?"
-        message="This permanently removes the game and its scores from History and Stats."
-        confirmLabel="Delete"
-        onCancel={() => setDeletingId(null)}
-        onConfirm={handleDelete}
-      />
     </div>
   );
 }

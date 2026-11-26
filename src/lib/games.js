@@ -93,6 +93,8 @@ async function updateGame(gameId, mutate) {
 }
 
 export async function createGame(playerNames, { practice = false } = {}) {
+  const keys = playerNames.map((n) => n.trim().toLowerCase());
+  if (new Set(keys).size !== keys.length) throw new Error('Each player needs a different name');
   const players = playerNames.map((name) => ({ id: createPlayerId(), name }));
   if (practice) {
     const id = `${PRACTICE_PREFIX}${createPlayerId()}`;
@@ -123,6 +125,11 @@ export async function addPlayerToGame(gameId, name, fillMode = 'highest') {
   if (!trimmed) return;
   await updateGame(gameId, (game, now) => {
     if (game.players.length >= MAX_PLAYERS) throw new Error(`Games are capped at ${MAX_PLAYERS} players`);
+    // Stats match players across games by name, so two people with the same
+    // name in one game would merge into one record.
+    if (game.players.some((p) => p.name.trim().toLowerCase() === trimmed.toLowerCase())) {
+      throw new Error(`${trimmed} is already in this game`);
+    }
     const id = createPlayerId();
     const rounds = game.rounds.map((r) => ({
       ...r,

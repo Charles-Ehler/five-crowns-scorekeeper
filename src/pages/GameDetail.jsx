@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
-import { ArrowLeft, Pause, Play, Swords, Trophy } from 'lucide-react';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Pause, Play, Swords, Trash2, Trophy } from 'lucide-react';
+import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import RaceChart from '../components/RaceChart.jsx';
 import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import { wildRankWordForRound } from '../lib/fiveCrowns.js';
-import { subscribeToGame } from '../lib/games.js';
+import { deleteGame, subscribeToGame } from '../lib/games.js';
 
 const REPLAY_STEP_MS = 900;
 
@@ -84,6 +85,8 @@ export default function GameDetail() {
   const { gameId } = useParams();
   const [game, setGame] = useState(undefined);
   const [error, setError] = useState(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setGame(undefined);
@@ -139,6 +142,31 @@ export default function GameDetail() {
         )}
         <ScorecardGrid players={game.players} rounds={game.rounds} />
       </div>
+
+      {/* Deliberately at the bottom of the game's own page, not on every History
+          card: deleting a game permanently removes it from everyone's stats. */}
+      <div className="pt-6 text-center">
+        <button
+          type="button"
+          onClick={() => setConfirmingDelete(true)}
+          className="press inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-muted hover:bg-heart/10 hover:text-heart dark:text-muted-dark"
+        >
+          <Trash2 size={14} />
+          Delete this game
+        </button>
+      </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete this game for good?"
+        message="It disappears from History and every player's stats, on every device. This can't be undone."
+        confirmLabel="Delete game"
+        onCancel={() => setConfirmingDelete(false)}
+        onConfirm={async () => {
+          await deleteGame(game.id);
+          navigate('/history', { replace: true });
+        }}
+      />
     </div>
   );
 }

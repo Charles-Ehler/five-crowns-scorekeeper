@@ -49,10 +49,13 @@ function NewGameForm() {
   }, []);
 
   const trimmed = names.map((n) => n.trim());
+  const lowered = trimmed.map((n) => n.toLowerCase());
+  const duplicateIndexes = new Set(lowered.flatMap((n, i) => (n && lowered.indexOf(n) !== i ? [i, lowered.indexOf(n)] : [])));
   const canStart =
     trimmed.length >= MIN_PLAYERS &&
     trimmed.length <= MAX_PLAYERS &&
-    trimmed.every((n) => n.length > 0);
+    trimmed.every((n) => n.length > 0) &&
+    duplicateIndexes.size === 0;
 
   function updateName(index, value) {
     setNames((prev) => prev.map((n, i) => (i === index ? value : n)));
@@ -151,7 +154,8 @@ function NewGameForm() {
                 value={name}
                 onChange={(e) => updateName(i, e.target.value)}
                 placeholder={`Player ${i + 1}`}
-                className="card-elevated min-w-0 flex-1 rounded-2xl bg-parchment-panel p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-panel dark:text-cream"
+                aria-invalid={duplicateIndexes.has(i)}
+                className={`card-elevated min-w-0 flex-1 rounded-2xl bg-parchment-panel p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-panel dark:text-cream ${duplicateIndexes.has(i) ? 'ring-2 ring-heart' : ''}`}
               />
               <button
                 type="button"
@@ -216,6 +220,9 @@ function NewGameForm() {
         </div>
       )}
 
+      {duplicateIndexes.size > 0 && (
+        <p className="text-sm font-bold text-heart">Two players have the same name. Add a last initial so their stats stay separate.</p>
+      )}
       {error && <p className="text-sm font-bold text-heart">{error}</p>}
 
       <button
@@ -263,6 +270,8 @@ function LiveGame({ gameId }) {
   const [removingOpen, setRemovingOpen] = useState(false);
   const [removingPlayer, setRemovingPlayer] = useState(null);
   const [removeError, setRemoveError] = useState(null);
+  const [dealing, setDealing] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem(CURRENT_GAME_KEY, gameId);
@@ -343,7 +352,8 @@ function LiveGame({ gameId }) {
 
   // Practice only: a plausible round so a demo can race to the finish. One
   // player goes out; the rest hold a random number of points for the hand size.
-  function dealRandomRound() {
+  async function dealRandomRound() {
+    if (dealing) return;
     const handSize = game.currentRound + 2;
     const outIndex = Math.floor(Math.random() * game.players.length);
     const scores = {};
@@ -351,7 +361,15 @@ function LiveGame({ gameId }) {
       const score = i === outIndex || Math.random() < 0.15 ? 0 : Math.floor(Math.random() * handSize * 5);
       scores[p.id] = { score, wentOut: i === outIndex };
     });
-    handleMainSubmit(scores);
+    setDealing(true);
+    setActionError(null);
+    try {
+      await handleMainSubmit(scores);
+    } catch (err) {
+      setActionError(err?.message ?? 'Could not deal a round');
+    } finally {
+      setDealing(false);
+    }
   }
 
   function handleEndPractice() {
@@ -386,7 +404,7 @@ function LiveGame({ gameId }) {
           </p>
           <div className="flex gap-2">
             {!isComplete && (
-              <button type="button" onClick={dealRandomRound} className="press flex items-center gap-1.5 rounded-full bg-gold px-3 py-1.5 text-sm font-bold text-ink">
+              <button type="button" onClick={dealRandomRound} disabled={dealing} className="press flex disabled:opacity-50 items-center gap-1.5 rounded-full bg-gold px-3 py-1.5 text-sm font-bold text-ink">
                 <Dices size={15} />
                 Deal random round
               </button>
@@ -396,6 +414,12 @@ function LiveGame({ gameId }) {
             </button>
           </div>
         </div>
+      )}
+
+      {actionError && (
+        <p role="alert" className="rounded-2xl bg-heart/10 px-4 py-3 text-sm font-bold text-heart">
+          {actionError}. Check the connection and try again.
+        </p>
       )}
 
       <div className={`card-elevated hero-sheen ${isComplete ? '' : 'sticky top-0'} z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel`}>
@@ -686,7 +710,11 @@ function LiveGame({ gameId }) {
         confirmLabel="Undo"
         onCancel={() => setConfirmingUndo(false)}
         onConfirm={async () => {
-          await undoLastRound(game.id);
+          try {
+            await undoLastRound(game.id);
+          } catch (err) {
+            setActionError(err?.message ?? 'Could not undo');
+          }
           setConfirmingUndo(false);
         }}
       />
