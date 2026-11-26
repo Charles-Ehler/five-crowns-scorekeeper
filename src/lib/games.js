@@ -133,7 +133,9 @@ export async function addPlayerToGame(gameId, name, fillMode = 'highest') {
     const id = createPlayerId();
     const rounds = game.rounds.map((r) => ({
       ...r,
-      scores: { ...r.scores, [id]: { score: missedRoundScore(r, game.players, fillMode), wentOut: false } },
+      // filled marks a score the player didn't actually play, so stats can
+      // count it in their total but leave it out of round records.
+      scores: { ...r.scores, [id]: { score: missedRoundScore(r, game.players, fillMode), wentOut: false, filled: true } },
     }));
     return { players: [...game.players, { id, name: trimmed }], rounds, updatedAt: now() };
   });

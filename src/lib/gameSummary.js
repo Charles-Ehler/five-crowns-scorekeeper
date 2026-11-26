@@ -33,7 +33,7 @@ export function outRates(completed) {
       const c = counts.get(key) ?? { out: 0, rounds: 0 };
       for (const round of game.rounds) {
         const entry = round.scores[p.id];
-        if (!entry) continue;
+        if (!entry || entry.filled) continue;
         c.rounds += 1;
         if (entry.wentOut) c.out += 1;
       }

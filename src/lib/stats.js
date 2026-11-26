@@ -90,6 +90,7 @@ export function computeStats(games) {
     const roundMinByNumber = new Map();
     for (const round of game.rounds) {
       const scoresThisRound = game.players
+        .filter((p) => !round.scores[p.id]?.filled)
         .map((p) => round.scores[p.id]?.score)
         .filter((s) => s !== undefined);
       if (scoresThisRound.length) roundMinByNumber.set(round.roundNumber, Math.min(...scoresThisRound));
@@ -110,7 +111,9 @@ export function computeStats(games) {
       let worstRoundGap = null;
       for (const round of game.rounds) {
         const entry = round.scores[p.id];
-        if (!entry) continue;
+        // Filled-in rounds (joined late) count toward the total via
+        // computeTotals, but weren't played, so they stay out of round stats.
+        if (!entry || entry.filled) continue;
         stat.roundsPlayed += 1;
         if (entry.wentOut) stat.wentOutCount += 1;
 

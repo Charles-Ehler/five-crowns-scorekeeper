@@ -56,7 +56,7 @@ export default function ScorecardGrid({ players, rounds, onEditRound }) {
                         readOnly ? (
                           <span className="inline-flex w-full items-center justify-center gap-1 px-2 py-1 font-bold tabular-nums text-ink dark:text-cream">
                             {isDealer && <Shuffle size={10} />}
-                            {entry.score}
+                            <span className={entry.filled ? 'italic opacity-50' : ''} title={entry.filled ? 'Filled in: joined after this round' : undefined}>{entry.score}</span>
                             {entry.wentOut && <span className="ml-1 text-heart">●</span>}
                           </span>
                         ) : (
@@ -66,7 +66,7 @@ export default function ScorecardGrid({ players, rounds, onEditRound }) {
                             className="press inline-flex w-full items-center justify-center gap-1 rounded-lg px-2 py-1 font-bold tabular-nums text-ink hover:bg-gold/10 dark:text-cream"
                           >
                             {isDealer && <Shuffle size={10} />}
-                            {entry.score}
+                            <span className={entry.filled ? 'italic opacity-50' : ''} title={entry.filled ? 'Filled in: joined after this round' : undefined}>{entry.score}</span>
                             {entry.wentOut && <span className="ml-1 text-heart">●</span>}
                           </button>
                         )

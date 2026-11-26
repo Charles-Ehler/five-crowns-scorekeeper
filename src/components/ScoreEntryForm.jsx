@@ -125,10 +125,13 @@ export default function ScoreEntryForm({
     const scoresByPlayerId = {};
     players.forEach((p) => {
       const value = safeEntries[p.id].score;
-      scoresByPlayerId[p.id] = {
-        score: value === '' ? 0 : Number(value),
-        wentOut: safeEntries[p.id].wentOut,
-      };
+      const score = value === '' ? 0 : Number(value);
+      const original = initialData?.[p.id];
+      scoresByPlayerId[p.id] = { score, wentOut: safeEntries[p.id].wentOut };
+      // Re-saving a round keeps the filled-in marker unless the score changed.
+      if (original?.filled && original.score === score && !safeEntries[p.id].wentOut) {
+        scoresByPlayerId[p.id].filled = true;
+      }
     });
     setSubmitting(true);
     setSubmitError(null);
