@@ -193,11 +193,21 @@ export default function ScoreEntryForm({
     setEntries((prev) => ({ ...prev, [playerId]: { ...(prev[playerId] ?? { wentOut: false }), score } }));
   }
 
+  // Functional updates, so fast taps or a hardware keyboard never drop a digit.
   function typeDigit(playerId, digit) {
-    const current = safeEntries[playerId].score;
-    const base = current === '0' ? '' : current;
-    if (base.length >= MAX_DIGITS) return;
-    setScore(playerId, base + digit);
+    setEntries((prev) => {
+      const entry = prev[playerId] ?? { score: '', wentOut: false };
+      const base = entry.score === '0' ? '' : entry.score;
+      if (entry.wentOut || base.length >= MAX_DIGITS) return prev;
+      return { ...prev, [playerId]: { ...entry, score: base + digit } };
+    });
+  }
+
+  function backspace(playerId) {
+    setEntries((prev) => {
+      const entry = prev[playerId] ?? { score: '', wentOut: false };
+      return { ...prev, [playerId]: { ...entry, score: entry.score.slice(0, -1) } };
+    });
   }
 
   // Going out is always a 0-point round, and only one player can go out, so
@@ -234,8 +244,8 @@ export default function ScoreEntryForm({
     if (!active) return undefined;
     function onKey(e) {
       if (e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey) return;
-      if (/^[0-9]$/.test(e.key) && !safeEntries[active.id].wentOut) typeDigit(active.id, e.key);
-      else if (e.key === 'Backspace') setScore(active.id, safeEntries[active.id].score.slice(0, -1));
+      if (/^[0-9]$/.test(e.key)) typeDigit(active.id, e.key);
+      else if (e.key === 'Backspace') backspace(active.id);
       else if (e.key === 'Enter') setActiveId(nextPlayerAfter(active.id)?.id ?? null);
       else if (e.key === 'Escape') setActiveId(null);
       else return;
@@ -348,7 +358,7 @@ export default function ScoreEntryForm({
             isLast={!nextPlayerAfter(active.id)}
             docked={docked}
             onDigit={(d) => typeDigit(active.id, d)}
-            onBackspace={() => setScore(active.id, safeEntries[active.id].score.slice(0, -1))}
+            onBackspace={() => backspace(active.id)}
             onClear={() => setScore(active.id, '')}
             onToggleOut={() => toggleWentOut(active.id)}
             onUse={(total) => setScore(active.id, String(total))}

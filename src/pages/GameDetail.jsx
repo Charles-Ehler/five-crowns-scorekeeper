@@ -173,6 +173,9 @@ export default function GameDetail() {
 
       {/* Deliberately at the bottom of the game's own page, not on every History
           card: deleting a game permanently removes it from everyone's stats. */}
+      {isComplete ? (
+        <p className="pt-6 text-center text-sm text-fg-soft">Finished games are kept for good, so everyone's stats stay complete.</p>
+      ) : (
       <div className="pt-6 text-center">
         <button
           type="button"
@@ -184,11 +187,12 @@ export default function GameDetail() {
         </button>
         {deleteError && <p role="alert" className="mt-2 text-sm font-bold text-heart">Not deleted: {deleteError}</p>}
       </div>
+      )}
 
       <ConfirmDialog
         open={confirmingDelete}
         title="Delete this game for good?"
-        message="It disappears from History and every player's stats, on every device. This can't be undone."
+        message="This unfinished game disappears from History on every device. This can't be undone."
         confirmLabel="Delete game"
         onCancel={() => setConfirmingDelete(false)}
         onConfirm={async () => {

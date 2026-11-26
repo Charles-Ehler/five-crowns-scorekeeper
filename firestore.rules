@@ -1,15 +1,48 @@
 rules_version = '2';
 
+// Five Crowns Scorekeeper. There is no sign-in, so these rules can't tell
+// the app apart from anyone else who has the project's public config. What
+// they do: only allow writes shaped like the app's own, and never let a
+// finished game (the family's stats) be deleted or emptied. The real
+// "only this app" lock is Firebase App Check (see README).
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Five Crowns Scorekeeper: no auth, casual family game tool.
-    // Scoped to this app's two dedicated collections only.
+
+    function isGameShape(d) {
+      return d.keys().hasOnly(['players', 'rounds', 'currentRound', 'status', 'winnerIds', 'createdAt', 'updatedAt', 'completedAt'])
+        && d.players is list && d.players.size() >= 2 && d.players.size() <= 7
+        && d.rounds is list && d.rounds.size() <= 11
+        && d.currentRound is int && d.currentRound >= 1 && d.currentRound <= 11
+        && d.status in ['in_progress', 'complete']
+        && d.winnerIds is list;
+    }
+
     match /fiveCrowns_games/{gameId} {
-      allow read, write: if true;
+      allow read: if true;
+
+      allow create: if isGameShape(request.resource.data)
+        && request.resource.data.status == 'in_progress'
+        && request.resource.data.rounds.size() == 0;
+
+      // A finished game stays finished with all 11 rounds: scores can be
+      // corrected, but the game can't be emptied, undone, or shrunk.
+      allow update: if isGameShape(request.resource.data)
+        && (resource.data.status != 'complete'
+            || (request.resource.data.status == 'complete'
+                && request.resource.data.rounds.size() == 11
+                && request.resource.data.players.size() == resource.data.players.size()));
+
+      // Only unfinished games (started by mistake) can be deleted.
+      allow delete: if resource.data.status != 'complete';
     }
 
     match /fiveCrowns_players/{playerId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().hasOnly(['name', 'lastUsedAt', 'photoUrl'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 40;
+      allow delete: if false;
     }
   }
 }
