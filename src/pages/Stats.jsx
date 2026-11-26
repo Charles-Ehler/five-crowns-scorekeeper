@@ -5,12 +5,13 @@ import Avatar from '../components/Avatar.jsx';
 import CrownTally from '../components/CrownTally.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import HeadToHead from '../components/HeadToHead.jsx';
+import Loading from '../components/Loading.jsx';
 import PlayerTable from '../components/PlayerTable.jsx';
 import RecordCard from '../components/RecordCard.jsx';
 import SeasonTimeline from '../components/SeasonTimeline.jsx';
 import { wildRankWordForRound } from '../lib/fiveCrowns.js';
 import { listGames } from '../lib/games.js';
-import { formatDate, summarizeGame, timestampMs } from '../lib/gameSummary.js';
+import { formatDate, outRates, summarizeGame, timestampMs } from '../lib/gameSummary.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { computeStats, playerKey } from '../lib/stats.js';
 
@@ -40,25 +41,6 @@ function Section({ title, hint, children, className = '' }) {
       {children}
     </section>
   );
-}
-
-// Times each player went out, across finished games. stats.js only exposes a
-// rate once someone has a full game of rounds; the table wants it for all.
-function outRates(completed) {
-  const counts = new Map();
-  for (const game of completed) {
-    for (const p of game.players) {
-      const c = counts.get(playerKey(p.name)) ?? { out: 0, rounds: 0 };
-      for (const round of game.rounds) {
-        const entry = round.scores[p.id];
-        if (!entry) continue;
-        c.rounds += 1;
-        if (entry.wentOut) c.out += 1;
-      }
-      counts.set(playerKey(p.name), c);
-    }
-  }
-  return counts;
 }
 
 function buildRecords(stats, completed, outs) {
@@ -131,7 +113,7 @@ export default function Stats() {
   }
 
   if (error) return <div className="p-4 font-bold text-heart">Couldn't load stats: {error}</div>;
-  if (!data) return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
+  if (!data) return <Loading />;
   if (data.completed.length === 0) return <EmptyState title="No stats yet" message="Finish a game and the crowns start counting here." />;
 
   const { completed, stats, players, records } = data;

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Check, Dices, FlaskConical, ListOrdered, Plus, Shuffle, Sparkles, Share2, TrendingUp, Undo2, UserMinus, UserPlus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, Dices, FlaskConical, ListOrdered, Plus, Shuffle, Share2, TrendingUp, Undo2, UserMinus, UserPlus, X } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ConfettiBurst from '../components/ConfettiBurst.jsx';
 import DealInterstitial from '../components/DealInterstitial.jsx';
+import Loading from '../components/Loading.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import RaceChart from '../components/RaceChart.jsx';
 import PlayingCard from '../components/PlayingCard.jsx';
@@ -21,7 +22,6 @@ import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
 import { CURRENT_GAME_KEY } from '../lib/storageKeys.js';
-import { suitForIndex } from '../lib/suits.js';
 
 export default function Play({ forceNew = false }) {
   const { gameId: paramGameId } = useParams();
@@ -38,8 +38,9 @@ export default function Play({ forceNew = false }) {
 }
 
 function NewGameForm() {
-  const [names, setNames] = useState(['', '']);
-  const [recentPlayers, setRecentPlayers] = useState([]);
+  // Seat order is deal order: seat 1 deals the first round.
+  const [names, setNames] = useState([]);
+  const [recentPlayers, setRecentPlayers] = useState(undefined);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -56,57 +57,51 @@ function NewGameForm() {
     trimmed.length <= MAX_PLAYERS &&
     trimmed.every((n) => n.length > 0) &&
     duplicateIndexes.size === 0;
+  const tableFull = names.length >= MAX_PLAYERS;
 
   function updateName(index, value) {
     setNames((prev) => prev.map((n, i) => (i === index ? value : n)));
   }
 
   function addPlayer(prefill = '') {
-    if (names.length >= MAX_PLAYERS) return;
+    if (tableFull) return;
     setNames((prev) => [...prev, prefill]);
   }
 
   function removePlayer(index) {
-    if (names.length <= MIN_PLAYERS) return;
     setNames((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function moveUp(index) {
-    if (index === 0) return;
+  function move(index, delta) {
+    const target = index + delta;
+    if (target < 0 || target >= names.length) return;
     setNames((prev) => {
       const next = [...prev];
-      [next[index - 1], next[index]] = [next[index], next[index - 1]];
+      [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
   }
 
-  function moveDown(index) {
-    if (index === names.length - 1) return;
-    setNames((prev) => {
-      const next = [...prev];
-      [next[index], next[index + 1]] = [next[index + 1], next[index]];
-      return next;
-    });
-  }
-
-  function addRecent(name) {
-    const alreadyUsed = trimmed.some((n) => n.toLowerCase() === name.toLowerCase());
-    if (alreadyUsed) return;
-    const emptyIndex = names.findIndex((n) => n.trim() === '');
-    if (emptyIndex !== -1) {
-      updateName(emptyIndex, name);
-    } else {
-      addPlayer(name);
+  // Tapping a face seats them (in an empty seat if there is one), tapping
+  // again stands them up.
+  function toggleRecent(name) {
+    const seatedAt = lowered.indexOf(name.toLowerCase());
+    if (seatedAt !== -1) {
+      removePlayer(seatedAt);
+      return;
     }
+    const emptyIndex = names.findIndex((n) => n.trim() === '');
+    if (emptyIndex !== -1) updateName(emptyIndex, name);
+    else addPlayer(name);
   }
 
-  // A practice game uses the names entered, or the 4 most recent players when
-  // the form isn't filled in, so a demo is one tap away.
+  // A practice game uses the players seated, or the 4 most recent players when
+  // the table isn't ready, so a demo is one tap away.
   async function handleStart(practice = false) {
     if (!practice && !canStart) return;
     let playerNames = trimmed;
     if (practice && !canStart) {
-      const recent = recentPlayers.slice(0, 4).map((r) => r.name);
+      const recent = (recentPlayers ?? []).slice(0, 4).map((r) => r.name);
       playerNames = recent.length >= MIN_PLAYERS ? recent : ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
     }
     setStarting(true);
@@ -121,56 +116,102 @@ function NewGameForm() {
     }
   }
 
-  // Already ordered most-recent-first by the Firestore query.
-  const availableRecent = recentPlayers.filter(
-    (r) => !trimmed.some((t) => t.toLowerCase() === r.name.toLowerCase()),
-  );
+  const seatedCount = trimmed.filter(Boolean).length;
+  const startHint =
+    seatedCount < MIN_PLAYERS
+      ? `Seat at least ${MIN_PLAYERS} players to start.`
+      : !canStart
+        ? 'Fill in every seat with a different name.'
+        : `${seatedCount} players. ${trimmed[0]} deals first.`;
 
   return (
-    <div className="mx-auto max-w-xl space-y-5 p-4 md:p-8">
-      <div>
-        <h1 className="flex items-center gap-2 font-display text-2xl text-ink dark:text-cream">
-          <Sparkles className="text-gold" size={20} />
-          New Game
-        </h1>
-        <p className="mt-1 text-sm text-muted dark:text-muted-dark">Add 2-7 players to get started.</p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-8 p-4 md:p-8">
+      <header>
+        <h1 className="font-display text-4xl font-bold text-ink md:text-5xl dark:text-cream">Who's playing?</h1>
+        <p className="mt-2 text-muted dark:text-muted-dark">Tap faces to seat them. Seat 1 deals the first round.</p>
+      </header>
 
-      <div className="space-y-2.5">
-        {names.map((name, i) => {
-          return (
-            <div key={i} className="flex items-center gap-2">
+      {recentPlayers === undefined ? (
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5" aria-hidden="true">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-32 animate-pulse rounded-2xl bg-muted/10 dark:bg-muted-dark/10" />
+          ))}
+        </div>
+      ) : recentPlayers.length > 0 ? (
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
+          {recentPlayers.map((r) => {
+            const seat = lowered.indexOf(r.name.toLowerCase());
+            const seated = seat !== -1;
+            return (
+              <button
+                key={r.name}
+                type="button"
+                onClick={() => toggleRecent(r.name)}
+                disabled={!seated && tableFull}
+                aria-pressed={seated}
+                className={[
+                  'press relative flex flex-col items-center gap-2 rounded-2xl border-2 px-2 pb-3 pt-4 transition-colors disabled:opacity-40',
+                  seated
+                    ? 'border-gold bg-gold/10'
+                    : 'border-transparent bg-parchment-panel dark:bg-ink-panel',
+                ].join(' ')}
+              >
+                {seated && (
+                  <span className="animate-pop-in absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-xs font-bold text-ink">
+                    {seat + 1}
+                  </span>
+                )}
+                <Avatar name={r.name} sizeClass="h-16 w-16 text-2xl" />
+                <span className="w-full truncate text-center font-semibold text-ink dark:text-cream">{r.name}</span>
+                {r.lastUsedAt && (
+                  <span className="-mt-1.5 text-xs text-muted dark:text-muted-dark">{formatRelativeDate(r.lastUsedAt)}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      <section>
+        <h2 className="mb-3 font-display text-2xl font-bold text-ink dark:text-cream">The table</h2>
+        {names.length === 0 && (
+          <p className="mb-3 rounded-2xl border-2 border-dashed border-parchment-line p-5 text-center text-muted dark:border-ink-line dark:text-muted-dark">
+            Nobody is seated yet.
+          </p>
+        )}
+        <ol className="space-y-2.5">
+          {names.map((name, i) => (
+            <li key={i} className="flex items-center gap-2">
+              <span className="flex w-7 shrink-0 justify-center font-display text-xl font-bold text-gold-deep dark:text-gold">{i + 1}</span>
               {name.trim() ? (
                 <Avatar name={name} sizeClass="h-11 w-11 text-sm" />
               ) : (
-                <span
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-cream ${suitForIndex(i).bg}`}
-                >
-                  {i + 1}
-                </span>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-parchment-line dark:border-ink-line" />
               )}
               <input
                 type="text"
                 value={name}
+                autoFocus={!name}
                 onChange={(e) => updateName(i, e.target.value)}
-                placeholder={`Player ${i + 1}`}
+                placeholder="Name"
+                aria-label={`Seat ${i + 1} name`}
                 aria-invalid={duplicateIndexes.has(i)}
                 className={`card-elevated min-w-0 flex-1 rounded-2xl bg-parchment-panel p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-panel dark:text-cream ${duplicateIndexes.has(i) ? 'ring-2 ring-heart' : ''}`}
               />
               <button
                 type="button"
-                onClick={() => moveUp(i)}
+                onClick={() => move(i, -1)}
                 disabled={i === 0}
-                aria-label="Move up"
+                aria-label={`Move seat ${i + 1} up`}
                 className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-ink disabled:opacity-30 dark:bg-ink-panel dark:text-cream"
               >
                 <ChevronUp size={18} />
               </button>
               <button
                 type="button"
-                onClick={() => moveDown(i)}
+                onClick={() => move(i, 1)}
                 disabled={i === names.length - 1}
-                aria-label="Move down"
+                aria-label={`Move seat ${i + 1} down`}
                 className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-ink disabled:opacity-30 dark:bg-ink-panel dark:text-cream"
               >
                 <ChevronDown size={18} />
@@ -178,76 +219,54 @@ function NewGameForm() {
               <button
                 type="button"
                 onClick={() => removePlayer(i)}
-                disabled={names.length <= MIN_PLAYERS}
-                aria-label="Remove player"
-                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-heart text-cream disabled:opacity-30"
+                aria-label={`Clear seat ${i + 1}`}
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-heart dark:bg-ink-panel"
               >
                 <X size={18} />
               </button>
-            </div>
-          );
-        })}
+            </li>
+          ))}
+        </ol>
+        <button
+          type="button"
+          onClick={() => addPlayer()}
+          disabled={tableFull}
+          className="press mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-3 font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
+        >
+          <Plus size={18} />
+          {tableFull ? `The table is full (${MAX_PLAYERS} players)` : 'Add someone new'}
+        </button>
+      </section>
+
+      <div className="space-y-3">
+        {duplicateIndexes.size > 0 && (
+          <p className="text-sm font-bold text-heart">Two players have the same name. Add a last initial so their stats stay separate.</p>
+        )}
+        {error && <p className="text-sm font-bold text-heart">{error}</p>}
+        <button
+          type="button"
+          onClick={() => handleStart()}
+          disabled={!canStart || starting}
+          className="press w-full rounded-2xl bg-gold py-4 font-display text-2xl font-bold text-ink shadow-lg shadow-gold/20 disabled:opacity-40"
+        >
+          {starting ? 'Dealing…' : 'Deal the first hand'}
+        </button>
+        <p className="text-center text-sm text-muted dark:text-muted-dark">{startHint}</p>
+        <button
+          type="button"
+          onClick={() => handleStart(true)}
+          disabled={starting}
+          className="press flex w-full flex-col items-center gap-0.5 rounded-2xl border border-parchment-line py-3 text-ink disabled:opacity-40 dark:border-ink-line dark:text-cream"
+        >
+          <span className="flex items-center gap-1.5 font-semibold">
+            <FlaskConical size={16} />
+            Start a practice game
+          </span>
+          <span className="text-xs text-muted dark:text-muted-dark">
+            Not saved to History or Stats. {canStart ? 'Uses the players seated.' : 'Uses 4 recent players.'}
+          </span>
+        </button>
       </div>
-
-      <button
-        type="button"
-        onClick={() => addPlayer()}
-        disabled={names.length >= MAX_PLAYERS}
-        className="press flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-3 font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
-      >
-        <Plus size={18} />
-        Add player
-      </button>
-
-      {availableRecent.length > 0 && (
-        <div>
-          <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">Recent players</p>
-          <div className="flex flex-wrap gap-2">
-            {availableRecent.map((r) => (
-              <button
-                key={r.name}
-                type="button"
-                onClick={() => addRecent(r.name)}
-                className="card-elevated press rounded-full bg-parchment-panel px-3 py-1.5 text-left text-sm font-bold text-ink dark:bg-ink-panel dark:text-cream"
-              >
-                {r.name}
-                {r.lastUsedAt && (
-                  <span className="ml-1.5 text-xs font-normal text-muted dark:text-muted-dark">{formatRelativeDate(r.lastUsedAt)}</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {duplicateIndexes.size > 0 && (
-        <p className="text-sm font-bold text-heart">Two players have the same name. Add a last initial so their stats stay separate.</p>
-      )}
-      {error && <p className="text-sm font-bold text-heart">{error}</p>}
-
-      <button
-        type="button"
-        onClick={() => handleStart()}
-        disabled={!canStart || starting}
-        className="press w-full rounded-2xl bg-gold py-3.5 font-display text-lg text-ink shadow-lg shadow-gold/20 disabled:opacity-40"
-      >
-        {starting ? 'Starting…' : 'Start Game'}
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleStart(true)}
-        disabled={starting}
-        className="press flex w-full flex-col items-center gap-0.5 rounded-2xl border border-parchment-line py-3 text-ink disabled:opacity-40 dark:border-ink-line dark:text-cream"
-      >
-        <span className="flex items-center gap-1.5 font-semibold">
-          <FlaskConical size={16} />
-          Start a practice game
-        </span>
-        <span className="text-xs text-muted dark:text-muted-dark">
-          Not saved to History or Stats. {canStart ? 'Uses the players above.' : 'Uses 4 recent players.'}
-        </span>
-      </button>
     </div>
   );
 }
@@ -309,7 +328,7 @@ function LiveGame({ gameId }) {
   }
 
   if (game === undefined) {
-    return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
+    return <Loading label="Finding your seats" />;
   }
 
   if (game === null) {
@@ -317,7 +336,7 @@ function LiveGame({ gameId }) {
       <div className="p-4 text-center">
         <p className="mt-8 text-muted dark:text-muted-dark">This game no longer exists.</p>
         <NavLink to="/play/new" className="mt-3 inline-block font-bold text-gold-deep dark:text-gold">
-          Start a new game →
+          Start a new game
         </NavLink>
       </div>
     );
@@ -541,7 +560,7 @@ function LiveGame({ gameId }) {
         <div className="md:col-start-1 md:row-start-2">
           <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
             <TrendingUp size={13} />
-            The race {hasDraft && <span className="normal-case tracking-normal">· live preview</span>}
+            The race {hasDraft && <span className="font-normal">(live preview)</span>}
           </p>
           <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
             <RaceChart players={game.players} rounds={chartRounds} />

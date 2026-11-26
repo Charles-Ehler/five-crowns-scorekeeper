@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pause, Play, Swords, Trash2, Trophy } from 'lucide-react';
+import { ArrowLeft, Crown, Pause, Play, Swords, Trash2 } from 'lucide-react';
+import Avatar from '../components/Avatar.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
+import DateCard from '../components/DateCard.jsx';
+import Loading from '../components/Loading.jsx';
 import PlayerTotals from '../components/PlayerTotals.jsx';
 import RaceChart from '../components/RaceChart.jsx';
 import ScorecardGrid from '../components/ScorecardGrid.jsx';
-import { wildRankWordForRound } from '../lib/fiveCrowns.js';
+import { TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
+import { formatDate, summarizeGame } from '../lib/gameSummary.js';
 import { deleteGame, subscribeToGame } from '../lib/games.js';
 
 const REPLAY_STEP_MS = 900;
@@ -39,12 +43,12 @@ function Replay({ game }) {
   const shownRounds = game.rounds.filter((r) => r.roundNumber <= round);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
       <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-sm font-semibold text-muted dark:text-muted-dark">Replay</p>
           <p className="text-xs font-bold text-ink dark:text-cream">
-            {round === 0 ? 'Before the deal' : `After ${wildRankWordForRound(round)} · R${round}`}
+            {round === 0 ? 'Before the deal' : `After ${wildRankWordForRound(round)}, round ${round}`}
           </p>
         </div>
         <RaceChart players={game.players} rounds={game.rounds} upToRound={round} />
@@ -98,33 +102,55 @@ export default function GameDetail() {
     return <div className="p-4 font-bold text-heart">Couldn't load this game: {error}</div>;
   }
 
-  if (game === undefined) {
-    return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
-  }
+  if (game === undefined) return <Loading />;
 
   if (game === null) {
     return (
       <div className="p-4 text-center">
         <p className="mt-8 text-muted dark:text-muted-dark">This game no longer exists.</p>
         <NavLink to="/history" className="mt-3 inline-block font-bold text-gold-deep dark:text-gold">
-          ← Back to history
+          Back to history
         </NavLink>
       </div>
     );
   }
 
   const isComplete = game.status === 'complete';
+  const { winners, margin } = summarizeGame(game);
+  const winnerNames = winners.map((w) => w.player.name);
 
   return (
     <div className="space-y-4 p-4 md:p-6">
-      <NavLink to="/history" className="inline-flex items-center gap-1 text-sm font-bold text-ink dark:text-cream">
+      <NavLink to="/history" viewTransition className="inline-flex items-center gap-1 text-sm font-bold text-ink dark:text-cream">
         <ArrowLeft size={16} />
         Back to history
       </NavLink>
-      <h1 className="flex items-center gap-2 font-display text-xl text-ink dark:text-cream">
-        {isComplete && <Trophy size={20} className="text-gold" />}
-        {isComplete ? 'Final standings' : `In progress · round ${game.currentRound}`}
-      </h1>
+      <header className="flex items-center gap-4 pb-2">
+        <DateCard ts={game.createdAt} size="lg" />
+        {isComplete ? (
+          <div className="flex min-w-0 items-center gap-4">
+            <span className="relative hidden shrink-0 sm:block">
+              <Crown size={22} fill="currentColor" className="absolute -top-4 left-1/2 -translate-x-1/2 text-gold" />
+              <Avatar name={winnerNames[0]} sizeClass="h-16 w-16 text-2xl rounded-full ring-2 ring-gold" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="font-display text-4xl font-bold leading-tight text-ink dark:text-cream">
+                {winnerNames.length > 1 ? `${winnerNames.join(' & ')} tied` : `${winnerNames[0]} won`}
+              </h1>
+              <p className="text-muted dark:text-muted-dark">
+                {margin !== null ? `By ${margin} ${margin === 1 ? 'point' : 'points'}` : 'A shared crown'}, {formatDate(game.createdAt, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="min-w-0">
+            <h1 className="font-display text-4xl font-bold leading-tight text-ink dark:text-cream">Still being played</h1>
+            <p className="text-muted dark:text-muted-dark">
+              Round {game.currentRound} of {TOTAL_ROUNDS}, {wildRankWordForRound(game.currentRound)} are wild.
+            </p>
+          </div>
+        )}
+      </header>
       {!isComplete && (
         <NavLink
           to={`/play/${game.id}`}
@@ -134,14 +160,15 @@ export default function GameDetail() {
           Continue game
         </NavLink>
       )}
-      <div className="space-y-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
-        {game.rounds.length > 0 ? (
-          <Replay game={game} />
-        ) : (
-          <PlayerTotals players={game.players} rounds={game.rounds} dealerRound={game.currentRound} />
-        )}
+      {game.rounds.length > 0 ? (
+        <Replay game={game} />
+      ) : (
+        <PlayerTotals players={game.players} rounds={game.rounds} dealerRound={game.currentRound} />
+      )}
+      <section>
+        <h2 className="mb-3 font-display text-2xl font-bold text-ink dark:text-cream">Scorecard</h2>
         <ScorecardGrid players={game.players} rounds={game.rounds} />
-      </div>
+      </section>
 
       {/* Deliberately at the bottom of the game's own page, not on every History
           card: deleting a game permanently removes it from everyone's stats. */}

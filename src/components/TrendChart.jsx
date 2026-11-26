@@ -56,10 +56,10 @@ export default function TrendChart({ name, history, average }) {
       </svg>
       <div className="mt-1 flex items-center justify-between text-sm">
         <span className="text-muted dark:text-muted-dark">
-          {formatDate(pick.createdAt)} · {pick.won ? 'Won' : `#${pick.placement}`}
+          {formatDate(pick.createdAt)}, {pick.won ? 'won' : `finished #${pick.placement}`}
         </span>
         <NavLink to={`/history/${pick.gameId}`} viewTransition className="font-bold text-gold-deep dark:text-gold">
-          {pick.total} pts →
+          Open game ({pick.total} pts)
         </NavLink>
       </div>
     </div>

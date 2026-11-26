@@ -22,6 +22,27 @@ export function summarizeGame(game) {
   };
 }
 
+// Rounds gone out and rounds played per player (keyed by lowercased name)
+// across finished games. stats.js only exposes a rate once someone has a full
+// game of rounds, the dashboard and player pages want it for everyone.
+export function outRates(completed) {
+  const counts = new Map();
+  for (const game of completed) {
+    for (const p of game.players) {
+      const key = p.name.trim().toLowerCase();
+      const c = counts.get(key) ?? { out: 0, rounds: 0 };
+      for (const round of game.rounds) {
+        const entry = round.scores[p.id];
+        if (!entry) continue;
+        c.rounds += 1;
+        if (entry.wentOut) c.out += 1;
+      }
+      counts.set(key, c);
+    }
+  }
+  return counts;
+}
+
 export function timestampMs(ts) {
   return ts?.toMillis ? ts.toMillis() : 0;
 }

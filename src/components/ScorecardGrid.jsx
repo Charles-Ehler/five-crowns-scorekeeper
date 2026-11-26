@@ -1,10 +1,12 @@
 import { Shuffle } from 'lucide-react';
-import { dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
+import { computeTotals, dealerForRound, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
 import { suitForName } from '../lib/suits.js';
 
 export default function ScorecardGrid({ players, rounds, onEditRound }) {
   const readOnly = !onEditRound;
   const roundsByNumber = new Map(rounds.map((r) => [r.roundNumber, r]));
+  const totals = computeTotals(players, rounds);
+  const lowest = Math.min(...players.map((p) => totals[p.id]));
 
   return (
     <div className="card-elevated overflow-x-auto overflow-y-hidden rounded-2xl bg-parchment-panel dark:bg-ink-panel">
@@ -78,6 +80,23 @@ export default function ScorecardGrid({ players, rounds, onEditRound }) {
             );
           })}
         </tbody>
+        {rounds.length > 0 && (
+          <tfoot>
+            <tr className="border-t-2 border-gold/40">
+              <th className="sticky left-0 bg-parchment-panel p-2.5 text-left font-display text-base font-bold text-ink dark:bg-ink-panel dark:text-cream">
+                Total
+              </th>
+              {players.map((p) => (
+                <td
+                  key={p.id}
+                  className={`p-2.5 text-center font-display text-lg font-bold tabular-nums ${totals[p.id] === lowest ? 'text-gold-deep dark:text-gold' : 'text-ink dark:text-cream'}`}
+                >
+                  {totals[p.id]}
+                </td>
+              ))}
+            </tr>
+          </tfoot>
+        )}
       </table>
     </div>
   );

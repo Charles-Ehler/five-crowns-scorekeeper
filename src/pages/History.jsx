@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Crown, Play } from 'lucide-react';
 import Avatar from '../components/Avatar.jsx';
+import DateCard from '../components/DateCard.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Loading from '../components/Loading.jsx';
 import { TOTAL_ROUNDS } from '../lib/fiveCrowns.js';
 import { listGames } from '../lib/games.js';
 import { formatDate, summarizeGame, timestampMs } from '../lib/gameSummary.js';
@@ -43,18 +45,6 @@ function MiniRace({ game, winnerIds }) {
         />
       ))}
     </svg>
-  );
-}
-
-// The date as a small pearl playing card: day of month as the rank.
-function DateCard({ ts }) {
-  const d = ts?.toDate ? ts.toDate() : null;
-  return (
-    <span className="record-card flex h-[4.2rem] w-[3.1rem] shrink-0 flex-col items-center justify-center rounded-lg bg-pearl leading-none">
-      <span className="text-[10px] font-bold text-heart">{d ? d.toLocaleDateString(undefined, { month: 'short' }) : ''}</span>
-      <span className="font-display text-2xl font-bold text-ink">{d ? d.getDate() : '?'}</span>
-      <span className="text-[10px] text-muted">{d ? d.toLocaleDateString(undefined, { weekday: 'short' }) : ''}</span>
-    </span>
   );
 }
 
@@ -150,7 +140,7 @@ export default function History() {
   }, []);
 
   if (error) return <div className="p-4 font-bold text-heart">Couldn't load history: {error}</div>;
-  if (games === undefined) return <div className="p-4 font-bold text-muted dark:text-muted-dark">Loading…</div>;
+  if (games === undefined) return <Loading />;
   if (games.length === 0) return <EmptyState title="No games yet" message="Start a game on the Play tab and it lands here." />;
 
   // Players ordered by how often they play, for the filter chips.
