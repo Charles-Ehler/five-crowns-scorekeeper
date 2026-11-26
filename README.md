@@ -41,4 +41,4 @@ npx firebase-tools deploy --only firestore:rules --project "$(grep VITE_FIREBASE
 
 There's no sign-in, so rules can't tell this app apart from anyone else holding the public config. The full "only this app" lock is Firebase App Check (reCAPTCHA v3 for the web), which needs a site key from the Firebase console. Turning on App Check enforcement also blocks plain Node scripts, including the backup script.
 
-To test rule changes locally, run `npm run dev -- --mode emulator` with `VITE_USE_EMULATOR=1` and `VITE_FIREBASE_PROJECT_ID=demo-five-crowns` in `.env.emulator.local`, against `firebase emulators:start --only firestore`.
+`scripts/firestore-rules.test.mjs` checks the rules against a backup in the local emulator (instructions at the top of the file). To try the app itself against the emulator, run `npm run dev -- --mode emulator` with `VITE_USE_EMULATOR=1` and `VITE_FIREBASE_PROJECT_ID=demo-five-crowns` in `.env.emulator.local`, against `firebase emulators:start --only firestore`.

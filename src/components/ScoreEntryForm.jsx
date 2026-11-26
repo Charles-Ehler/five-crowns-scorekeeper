@@ -164,29 +164,28 @@ export default function ScoreEntryForm({
 
   // Keep the selected row fully visible: below the pinned round header and
   // above the docked pad (which is fixed, so the browser can't account for
-  // it on its own). Measured after the pad has rendered.
+  // it on its own). Effects run after the pad is in the DOM, so measuring
+  // here is accurate without waiting a frame.
   useEffect(() => {
     const row = activeId && rowRefs.current[activeId];
-    if (!row) return undefined;
+    if (!row) return;
     if (!docked) {
-      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      return undefined;
+      // Edit round sheet: row and pad sit together; show the pad's bottom.
+      row.parentElement?.querySelector('[data-score-pad]')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
     }
-    const frame = requestAnimationFrame(() => {
-      const scroller = row.closest('main');
-      const pad = document.querySelector('[data-score-pad]');
-      const header = document.querySelector('[data-round-header]');
-      if (!scroller || !pad) return;
-      const margin = 12;
-      const r = row.getBoundingClientRect();
-      const floor = pad.getBoundingClientRect().top - margin;
-      const ceiling = (header?.getBoundingClientRect().bottom ?? scroller.getBoundingClientRect().top) + margin;
-      let delta = 0;
-      if (r.bottom > floor) delta = r.bottom - floor;
-      else if (r.top < ceiling) delta = r.top - ceiling;
-      if (delta) scroller.scrollBy({ top: delta, behavior: 'smooth' });
-    });
-    return () => cancelAnimationFrame(frame);
+    const scroller = row.closest('main');
+    const pad = document.querySelector('[data-score-pad]');
+    const header = document.querySelector('[data-round-header]');
+    if (!scroller || !pad) return;
+    const margin = 12;
+    const r = row.getBoundingClientRect();
+    const floor = pad.getBoundingClientRect().top - margin;
+    const ceiling = (header?.getBoundingClientRect().bottom ?? scroller.getBoundingClientRect().top) + margin;
+    let delta = 0;
+    if (r.bottom > floor) delta = r.bottom - floor;
+    else if (r.top < ceiling) delta = r.top - ceiling;
+    if (delta) scroller.scrollBy({ top: delta, behavior: 'smooth' });
   }, [activeId, docked]);
 
   function setScore(playerId, score) {
@@ -283,14 +282,35 @@ export default function ScoreEntryForm({
     }
   }
 
+  function renderPad() {
+    return (
+            <ScorePad
+              player={active}
+              color={colors[active.id]}
+              value={safeEntries[active.id].score}
+              wentOut={safeEntries[active.id].wentOut}
+              roundNumber={roundNumber}
+              isLast={!nextPlayerAfter(active.id)}
+              docked={docked}
+              onDigit={(d) => typeDigit(active.id, d)}
+              onBackspace={() => backspace(active.id)}
+              onClear={() => setScore(active.id, '')}
+              onToggleOut={() => toggleWentOut(active.id)}
+              onUse={(total) => setScore(active.id, String(total))}
+              onNext={() => setActiveId(nextPlayerAfter(active.id)?.id ?? null)}
+              onClose={() => setActiveId(null)}
+            />
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
       {players.map((p) => {
         const { score, wentOut } = safeEntries[p.id];
         const isActive = active?.id === p.id;
         return (
+          <div key={p.id}>
           <div
-            key={p.id}
             ref={(el) => {
               rowRefs.current[p.id] = el;
             }}
@@ -319,6 +339,9 @@ export default function ScoreEntryForm({
               {wentOut ? '0' : score === '' ? <span className="opacity-30">0</span> : score}
             </button>
           </div>
+          {/* In the Edit round sheet the pad opens right under the tapped row. */}
+          {isActive && !docked && renderPad()}
+          </div>
         );
       })}
 
@@ -345,26 +368,11 @@ export default function ScoreEntryForm({
         </button>
       </div>
 
-      {active && (
+      {active && docked && (
         <>
           {/* Room to scroll the last rows above the docked pad. */}
-          {docked && <div aria-hidden="true" className="h-[22rem]" />}
-          <ScorePad
-            player={active}
-            color={colors[active.id]}
-            value={safeEntries[active.id].score}
-            wentOut={safeEntries[active.id].wentOut}
-            roundNumber={roundNumber}
-            isLast={!nextPlayerAfter(active.id)}
-            docked={docked}
-            onDigit={(d) => typeDigit(active.id, d)}
-            onBackspace={() => backspace(active.id)}
-            onClear={() => setScore(active.id, '')}
-            onToggleOut={() => toggleWentOut(active.id)}
-            onUse={(total) => setScore(active.id, String(total))}
-            onNext={() => setActiveId(nextPlayerAfter(active.id)?.id ?? null)}
-            onClose={() => setActiveId(null)}
-          />
+          <div aria-hidden="true" className="h-[22rem]" />
+          {renderPad()}
         </>
       )}
     </form>

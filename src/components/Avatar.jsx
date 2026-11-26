@@ -29,7 +29,7 @@ export default function Avatar({ name, sizeClass, className = '', color }) {
         />
       ) : (
         <span
-          className={`flex h-full w-full items-center justify-center rounded-full font-display font-bold ${color ? '' : `${suit.key === 'star' ? 'text-fg' : 'text-white'} ${suit.bg}`}`}
+          className={`flex h-full w-full items-center justify-center rounded-full font-display font-bold ${color ? '' : `${suit.key === 'star' ? 'text-[#111318]' : 'text-white'} ${suit.bg}`}`}
           style={color ? { background: colorVar(color), color: onColor(color) } : undefined}
         >
           {trimmed ? trimmed.charAt(0).toUpperCase() : '?'}
