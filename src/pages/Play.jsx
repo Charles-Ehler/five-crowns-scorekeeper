@@ -441,7 +441,7 @@ function LiveGame({ gameId }) {
         </p>
       )}
 
-      <div className={`card-elevated hero-sheen ${isComplete ? '' : 'sticky top-0'} z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel`}>
+      <div data-round-header className={`card-elevated hero-sheen ${isComplete ? '' : 'sticky top-0'} z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel`}>
         {isComplete && <ConfettiBurst />}
         <div className="relative flex items-start justify-between">
           {isComplete ? (
@@ -655,6 +655,7 @@ function LiveGame({ gameId }) {
               players={game.players}
               initialData={editingRoundData}
               roundNumber={editingRound}
+              docked={false}
               submitLabel="Save"
               onCancel={() => setEditingRound(null)}
               onSubmit={async (scores) => {

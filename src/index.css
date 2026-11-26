@@ -4,6 +4,42 @@
    rather than relying purely on prefers-color-scheme, so the in-app toggle works. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* "Card table, bold": flat color blocks, no glass, glow or gradients.
+   Semantic tokens switch with the theme, so components never need dark:
+   variants for them. Suit colors are the deck's printed colors, tuned so
+   white text passes 4.5:1 on every one except star (yellow), which takes
+   dark text. Seat colors 6 and 7 cover tables of 6-7 players. */
+:root {
+  --canvas: #f4f5f7;
+  --surface: #ffffff;
+  --surface-sunk: #e9ebef;
+  --line: #d7dae1;
+  --fg: #111318;
+  --fg-soft: #565c6b;
+  --accent: #f4b400;
+  --on-accent: #111318;
+}
+.dark {
+  --canvas: #0d0e11;
+  --surface: #18191e;
+  --surface-sunk: #101115;
+  --line: #2b2d34;
+  --fg: #f3f4f6;
+  --fg-soft: #a0a5b0;
+  --accent: #f4b400;
+  --on-accent: #111318;
+}
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+}
+
 @theme {
   /* Sapphire table: the deck's real five suit colors (Five Crowns prints
      hearts red, clubs green, diamonds blue, stars yellow, spades black) on a
@@ -354,4 +390,26 @@ button, a {
 :where(a, button, input, select, [tabindex]):focus-visible {
   outline: 2px solid var(--color-gold);
   outline-offset: 2px;
+}
+
+/* Score pad keys: big flat targets (48px+), instant press feedback. */
+.pad-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.6rem;
+  background: var(--surface-sunk);
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 1.05rem;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 90ms ease-out, filter 90ms ease-out;
+}
+.pad-key:active {
+  transform: scale(0.95);
+  filter: brightness(0.92);
+}
+.pad-key:disabled {
+  opacity: 0.35;
 }
