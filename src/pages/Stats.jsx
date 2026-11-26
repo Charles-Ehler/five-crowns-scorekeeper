@@ -10,7 +10,7 @@ import PlayerTable from '../components/PlayerTable.jsx';
 import RecordCard from '../components/RecordCard.jsx';
 import SeasonTimeline from '../components/SeasonTimeline.jsx';
 import { wildRankWordForRound } from '../lib/fiveCrowns.js';
-import { listGames } from '../lib/games.js';
+import { cachedGames, listGames } from '../lib/games.js';
 import { formatDate, outRates, summarizeGame, timestampMs } from '../lib/gameSummary.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { computeStats, playerKey } from '../lib/stats.js';
@@ -79,15 +79,19 @@ function buildRecords(stats, completed, outs) {
 }
 
 export default function Stats() {
-  const [games, setGames] = useState(undefined);
+  const [games, setGames] = useState(cachedGames);
   const [error, setError] = useState(null);
   const [scope, setScope] = useState(readScope);
   const [focus, setFocus] = useState(null);
 
   useEffect(() => {
+    // A failed refresh only matters when there's nothing cached to show.
+    const hadCache = cachedGames() !== undefined;
     listGames()
       .then(setGames)
-      .catch((err) => setError(err.message));
+      .catch((err) => {
+        if (!hadCache) setError(err.message);
+      });
   }, []);
 
   const data = useMemo(() => {

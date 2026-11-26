@@ -216,12 +216,22 @@ export async function deleteGame(gameId) {
   if (localStorage.getItem(CURRENT_GAME_KEY) === gameId) {
     localStorage.removeItem(CURRENT_GAME_KEY);
   }
+  if (lastGames) lastGames = lastGames.filter((g) => g.id !== gameId);
 }
+
+// The last lists loaded, kept for the session so switching tabs shows them
+// instantly while a fresh copy loads in the background, instead of a blank
+// screen whenever the network is slow.
+let lastGames;
+let lastRecentPlayers;
+export const cachedGames = () => lastGames;
+export const cachedRecentPlayers = () => lastRecentPlayers;
 
 export async function listGames() {
   const q = query(collection(db, GAMES_COLLECTION), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  lastGames = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return lastGames;
 }
 
 export async function saveRecentPlayerName(name) {
@@ -238,5 +248,6 @@ export async function saveRecentPlayerName(name) {
 export async function listRecentPlayerNames() {
   const q = query(collection(db, PLAYERS_COLLECTION), orderBy('lastUsedAt', 'desc'));
   const snap = await getDocs(q);
-  return snap.docs.slice(0, RECENT_PLAYERS_LIMIT).map((d) => ({ name: d.data().name, lastUsedAt: d.data().lastUsedAt }));
+  lastRecentPlayers = snap.docs.slice(0, RECENT_PLAYERS_LIMIT).map((d) => ({ name: d.data().name, lastUsedAt: d.data().lastUsedAt }));
+  return lastRecentPlayers;
 }

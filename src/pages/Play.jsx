@@ -15,9 +15,10 @@ import ScorecardGrid from '../components/ScorecardGrid.jsx';
 import ShareResultButton from '../components/ShareResultButton.jsx';
 import WinnerReveal from '../components/WinnerReveal.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
+import { useSlow } from '../hooks/useSlow.js';
 import { useWakeLock } from '../hooks/useWakeLock.js';
 import { MAX_PLAYERS, MIN_PLAYERS, dealerForRound, missedRoundScore, TOTAL_ROUNDS, wildRankWordForRound } from '../lib/fiveCrowns.js';
-import { addPlayerToGame, createGame, endPracticeGame, isPracticeGame, removePlayerFromGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
+import { addPlayerToGame, cachedRecentPlayers, createGame, endPracticeGame, isPracticeGame, removePlayerFromGame, listRecentPlayerNames, subscribeToGame, submitRoundScores, undoLastRound } from '../lib/games.js';
 import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
@@ -42,14 +43,22 @@ export default function Play({ forceNew = false }) {
 function NewGameForm() {
   // Seat order is deal order: seat 1 deals the first round.
   const [names, setNames] = useState([]);
-  const [recentPlayers, setRecentPlayers] = useState(undefined);
+  const [recentPlayers, setRecentPlayers] = useState(cachedRecentPlayers);
+  const [recentFailed, setRecentFailed] = useState(false);
+  const [recentAttempt, setRecentAttempt] = useState(0);
+  const recentSlow = useSlow(recentPlayers === undefined && !recentFailed);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    listRecentPlayerNames().then(setRecentPlayers).catch(() => setRecentPlayers([]));
-  }, []);
+    setRecentFailed(false);
+    listRecentPlayerNames()
+      .then(setRecentPlayers)
+      .catch(() => {
+        if (cachedRecentPlayers() === undefined) setRecentFailed(true);
+      });
+  }, [recentAttempt]);
 
   const trimmed = names.map((n) => n.trim());
   const lowered = trimmed.map((n) => n.toLowerCase());
@@ -133,7 +142,15 @@ function NewGameForm() {
         <p className="mt-2 text-fg-soft">Tap faces to seat them. Seat 1 deals the first round.</p>
       </header>
 
-      {recentPlayers === undefined ? (
+      {recentPlayers === undefined && (recentSlow || recentFailed) ? (
+        <div className="rounded-2xl border-2 border-dashed border-line p-5 text-center">
+          <p className="font-semibold text-fg">{recentFailed ? "Couldn't load recent players." : 'Recent players are taking a while to load.'}</p>
+          <p className="mt-1 text-sm text-fg-soft">Check the Wi-Fi. You can still type names below to start.</p>
+          <button type="button" onClick={() => setRecentAttempt((n) => n + 1)} className="press mt-3 rounded-full bg-fg px-5 py-2 text-sm font-bold text-canvas">
+            Try again
+          </button>
+        </div>
+      ) : recentPlayers === undefined ? (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5" aria-hidden="true">
           {Array.from({ length: 5 }, (_, i) => (
             <div key={i} className="h-32 animate-pulse rounded-2xl bg-surface-sunk" />

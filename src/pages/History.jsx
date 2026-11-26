@@ -6,7 +6,7 @@ import DateCard from '../components/DateCard.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Loading from '../components/Loading.jsx';
 import { TOTAL_ROUNDS } from '../lib/fiveCrowns.js';
-import { listGames } from '../lib/games.js';
+import { cachedGames, listGames } from '../lib/games.js';
 import { formatDate, summarizeGame, timestampMs } from '../lib/gameSummary.js';
 import { playerKey } from '../lib/stats.js';
 import { colorVar, onColor, seatColors } from '../lib/suits.js';
@@ -141,14 +141,18 @@ function GameCard({ game, highlight }) {
 }
 
 export default function History() {
-  const [games, setGames] = useState(undefined);
+  const [games, setGames] = useState(cachedGames);
   const [error, setError] = useState(null);
   const [player, setPlayer] = useState(null);
 
   useEffect(() => {
+    // A failed refresh only matters when there's nothing cached to show.
+    const hadCache = cachedGames() !== undefined;
     listGames()
       .then(setGames)
-      .catch((err) => setError(err.message));
+      .catch((err) => {
+        if (!hadCache) setError(err.message);
+      });
   }, []);
 
   if (error) return <div className="p-4 font-bold text-heart">Couldn't load history: {error}</div>;

@@ -11,7 +11,7 @@ import { usePlayerPhoto } from '../contexts/PlayerPhotosContext.jsx';
 import { wildRankWordForRound } from '../lib/fiveCrowns.js';
 import { formatDate, outRates } from '../lib/gameSummary.js';
 import { getCroppedImageBlob } from '../lib/imageCrop.js';
-import { listGames } from '../lib/games.js';
+import { cachedGames, listGames } from '../lib/games.js';
 import { removePlayerPhoto, uploadPlayerPhoto } from '../lib/photos.js';
 import { computeStats, playerKey } from '../lib/stats.js';
 
@@ -44,7 +44,7 @@ function Stat({ value, label }) {
 
 export default function PlayerDetail() {
   const { playerName } = useParams();
-  const [games, setGames] = useState(undefined);
+  const [games, setGames] = useState(cachedGames);
   const [error, setError] = useState(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState(null);
@@ -54,9 +54,13 @@ export default function PlayerDetail() {
   const photoUrl = usePlayerPhoto(decodedName);
 
   useEffect(() => {
+    // A failed refresh only matters when there's nothing cached to show.
+    const hadCache = cachedGames() !== undefined;
     listGames()
       .then(setGames)
-      .catch((err) => setError(err.message));
+      .catch((err) => {
+        if (!hadCache) setError(err.message);
+      });
   }, []);
 
   const data = useMemo(() => {
