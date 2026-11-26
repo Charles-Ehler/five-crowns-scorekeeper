@@ -20,12 +20,12 @@ export default function App() {
 
   return (
     <PlayerPhotosProvider>
-      <div className="flex h-dvh flex-col overflow-hidden bg-parchment dark:bg-ink-deep">
-        <header style={{ viewTransitionName: 'app-header' }} className="sticky top-0 z-20 flex items-center justify-between border-b border-parchment-line bg-parchment/95 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur dark:border-ink-line dark:bg-ink-deep/95">
-          <h1 className="flex items-baseline gap-1.5 font-display text-base text-ink dark:text-cream">
+      <div className="flex h-dvh flex-col overflow-hidden bg-canvas">
+        <header style={{ viewTransitionName: 'app-header' }} className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-canvas px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] border-line">
+          <h1 className="flex items-baseline gap-1.5 font-display text-base text-fg">
             <Crown size={18} className="mb-0.5 text-gold" fill="currentColor" />
             Five Crowns
-            <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted dark:text-muted-dark">v{version}</span>
+            <span className="font-sans text-xs font-normal normal-case tracking-normal text-fg-soft">v{version}</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -33,7 +33,7 @@ export default function App() {
               onClick={toggleFeedback}
               aria-label="Toggle sound and vibration"
               title="Sound & haptics (off by default)"
-              className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
+              className="press flex h-9 w-9 items-center justify-center rounded-full bg-surface-sunk text-fg"
             >
               {feedbackEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </button>
@@ -41,14 +41,14 @@ export default function App() {
               type="button"
               onClick={toggleTheme}
               aria-label="Toggle dark mode"
-              className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
+              className="press flex h-9 w-9 items-center justify-center rounded-full bg-surface-sunk text-fg"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
         </header>
 
-        <main className="table-glow flex-1 overflow-y-auto pb-24">
+        <main className="flex-1 overflow-y-auto pb-24">
           <div key={location.pathname} className="animate-page-in mx-auto w-full max-w-5xl">
             <Routes location={location}>
               <Route path="/" element={<Navigate to="/play" replace />} />

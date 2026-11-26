@@ -34,7 +34,7 @@ export default function ShareResultButton({ game }) {
     <button
       type="button"
       onClick={handleShare}
-      className="press card-elevated flex w-full items-center justify-center gap-1.5 rounded-xl bg-parchment-panel py-3 font-bold text-ink dark:bg-ink-panel dark:text-cream"
+      className="press card-elevated flex w-full items-center justify-center gap-1.5 rounded-xl bg-surface py-3 font-bold text-fg"
     >
       {status === 'idle' && (
         <>

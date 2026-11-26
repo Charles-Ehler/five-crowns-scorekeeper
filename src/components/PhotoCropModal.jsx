@@ -23,7 +23,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
-      <div className="px-4 py-3 text-center text-sm font-extrabold text-cream">Adjust photo</div>
+      <div className="px-4 py-3 text-center text-sm font-extrabold text-white">Adjust photo</div>
 
       <div className="relative flex-1 overflow-hidden">
         <Cropper
@@ -40,7 +40,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
       </div>
 
       <div className="space-y-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="flex items-center gap-3 text-cream">
+        <div className="flex items-center gap-3 text-white">
           <ZoomOut size={16} className="shrink-0" />
           <input
             type="range"
@@ -59,7 +59,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="flex-1 rounded-xl border-2 border-cream py-3 font-bold text-cream transition-transform active:scale-95 disabled:opacity-40"
+            className="flex-1 rounded-xl border-2 border-cream py-3 font-bold text-white transition-transform active:scale-95 disabled:opacity-40"
           >
             Cancel
           </button>
@@ -67,7 +67,7 @@ export default function PhotoCropModal({ imageSrc, onCancel, onConfirm }) {
             type="button"
             onClick={handleConfirm}
             disabled={!croppedAreaPixels || saving}
-            className="flex-1 rounded-xl bg-gold py-3 font-bold text-ink transition-transform active:scale-95 disabled:opacity-40"
+            className="flex-1 rounded-xl bg-gold py-3 font-bold text-on-accent transition-transform active:scale-95 disabled:opacity-40"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>

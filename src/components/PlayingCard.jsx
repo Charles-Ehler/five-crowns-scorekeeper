@@ -56,7 +56,6 @@ export default function PlayingCard({ round, size = 'md' }) {
           <span className="font-display text-[1.6em] font-bold">{rank}</span>
           <span className="text-[1.05em]">{suit.symbol}</span>
         </span>
-        <span className="playing-card-glint pointer-events-none absolute inset-0 rounded-[0.6em]" aria-hidden="true" />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { TOTAL_ROUNDS } from '../lib/fiveCrowns.js';
-import { suitForName } from '../lib/suits.js';
+import { colorVar, seatColors } from '../lib/suits.js';
 
 const RANK_INDEX = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 const W = 340;
@@ -28,6 +28,7 @@ export default function RaceChart({ players, rounds, upToRound }) {
   const shownRound = Math.min(upToRound ?? lastRound, lastRound);
   // Scale against the whole game, not just the shown slice, so the y-axis
   // stays put while a replay scrubs.
+  const colors = seatColors(players);
   const fullSeries = cumulativeSeries(players, rounds, lastRound);
   const series = cumulativeSeries(players, rounds, shownRound);
   const yMax = Math.max(10, ...fullSeries.flatMap((s) => s.points));
@@ -50,8 +51,8 @@ export default function RaceChart({ players, rounds, upToRound }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Cumulative score by round">
       {ticks.map((t) => (
         <g key={t}>
-          <line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} className="stroke-parchment-line dark:stroke-ink-line" strokeDasharray="2 4" />
-          <text x={PAD.l - 6} y={y(t) + 3} textAnchor="end" className="fill-muted text-[9px] dark:fill-muted-dark">
+          <line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} className="stroke-line" strokeDasharray="2 4" />
+          <text x={PAD.l - 6} y={y(t) + 3} textAnchor="end" className="fill-fg-soft text-[9px]">
             {t}
           </text>
         </g>
@@ -62,19 +63,19 @@ export default function RaceChart({ players, rounds, upToRound }) {
           x={x(i + 1)}
           y={H - 6}
           textAnchor="middle"
-          className={`text-[9px] font-bold ${i + 1 <= shownRound ? 'fill-ink dark:fill-cream' : 'fill-muted/50 dark:fill-muted-dark/50'}`}
+          className={`text-[9px] font-bold ${i + 1 <= shownRound ? 'fill-fg' : 'fill-muted/50/50'}`}
         >
           {rank}
         </text>
       ))}
 
       {series.map(({ player, points }) => {
-        const color = `var(--color-${suitForName(player.name).key})`;
+        const color = colorVar(colors[player.id]);
         const d = points.map((v, r) => `${r === 0 ? 'M' : 'L'}${x(r).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
         return (
           <g key={player.id}>
             <path d={d} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" className="race-line" />
-            <circle cx={x(points.length - 1)} cy={y(points[points.length - 1])} r="4" fill={color} className="stroke-parchment-panel dark:stroke-ink-panel" strokeWidth="2" />
+            <circle cx={x(points.length - 1)} cy={y(points[points.length - 1])} r="4" fill={color} className="stroke-surface" strokeWidth="2" />
           </g>
         );
       })}
@@ -84,7 +85,7 @@ export default function RaceChart({ players, rounds, upToRound }) {
           key={s.player.id}
           x={x(shownRound) + 8}
           y={s.ly + 3}
-          className="fill-ink text-[10px] font-bold dark:fill-cream"
+          className="fill-fg text-[10px] font-bold"
         >
           {s.player.name.length > 7 ? `${s.player.name.slice(0, 6)}…` : s.player.name} {s.total}
         </text>

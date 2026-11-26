@@ -25,8 +25,8 @@ function Section({ title, hint, children }) {
   return (
     <section>
       <div className="mb-3">
-        <h2 className="font-display text-2xl font-bold text-ink dark:text-cream">{title}</h2>
-        {hint && <p className="text-sm text-muted dark:text-muted-dark">{hint}</p>}
+        <h2 className="font-display text-2xl font-bold text-fg">{title}</h2>
+        {hint && <p className="text-sm text-fg-soft">{hint}</p>}
       </div>
       {children}
     </section>
@@ -36,8 +36,8 @@ function Section({ title, hint, children }) {
 function Stat({ value, label }) {
   return (
     <div className="flex flex-col items-center gap-0.5 px-2 py-4">
-      <span className="font-display text-3xl font-bold tabular-nums text-ink md:text-4xl dark:text-cream">{value}</span>
-      <span className="text-xs font-semibold text-muted dark:text-muted-dark">{label}</span>
+      <span className="font-display text-3xl font-bold tabular-nums text-fg md:text-4xl">{value}</span>
+      <span className="text-xs font-semibold text-fg-soft">{label}</span>
     </div>
   );
 }
@@ -108,7 +108,7 @@ export default function PlayerDetail() {
   }
 
   const backLink = (
-    <NavLink to="/stats" viewTransition className="inline-flex items-center gap-1 text-sm font-bold text-ink dark:text-cream">
+    <NavLink to="/stats" viewTransition className="inline-flex items-center gap-1 text-sm font-bold text-fg">
       <ArrowLeft size={16} />
       Back to stats
     </NavLink>
@@ -186,15 +186,15 @@ export default function PlayerDetail() {
             )}
             <Avatar name={player.name} sizeClass="h-28 w-28 text-5xl rounded-full ring-4 ring-gold/60" />
             {photoBusy ? (
-              <span className="absolute inset-0 flex items-center justify-center rounded-full bg-ink-deep/50">
-                <Loader2 size={24} className="animate-spin text-cream" />
+              <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                <Loader2 size={24} className="animate-spin text-white" />
               </span>
             ) : (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label={photoUrl ? 'Change photo' : 'Add photo'}
-                className="press absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-gold text-ink ring-4 ring-parchment dark:ring-ink-deep"
+                className="press absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-fg text-canvas ring-4 ring-canvas"
               >
                 <Camera size={16} />
               </button>
@@ -202,8 +202,8 @@ export default function PlayerDetail() {
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
           </div>
           <div className="min-w-0">
-            <h1 className="font-display text-5xl font-bold leading-none text-ink dark:text-cream">{player.name}</h1>
-            <p className="mt-2 text-lg text-muted dark:text-muted-dark">{summary}</p>
+            <h1 className="font-display text-5xl font-bold leading-none text-fg">{player.name}</h1>
+            <p className="mt-2 text-lg text-fg-soft">{summary}</p>
             <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
               {player.currentStreak >= 2 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-heart/15 px-3 py-1 text-sm font-bold text-heart">
@@ -215,7 +215,7 @@ export default function PlayerDetail() {
                 <button
                   type="button"
                   onClick={handlePhotoRemove}
-                  className="press inline-flex items-center gap-1 rounded-full bg-muted/10 px-3 py-1 text-sm font-semibold text-muted dark:bg-muted-dark/10 dark:text-muted-dark"
+                  className="press inline-flex items-center gap-1 rounded-full bg-surface-sunk px-3 py-1 text-sm font-semibold text-fg-soft"
                 >
                   <X size={13} />
                   Remove photo
@@ -226,7 +226,7 @@ export default function PlayerDetail() {
           </div>
         </header>
 
-        <div className="card-elevated grid grid-cols-2 divide-parchment-line rounded-3xl bg-parchment-panel sm:grid-cols-4 sm:divide-x dark:divide-ink-line dark:bg-ink-panel">
+        <div className="card-elevated grid grid-cols-2 divide-line rounded-3xl bg-surface sm:grid-cols-4 sm:divide-x">
           <Stat value={player.wins} label={player.wins === 1 ? 'Crown' : 'Crowns'} />
           <Stat value={`${winRate}%`} label="Win rate" />
           <Stat value={player.average.toFixed(1)} label="Avg score" />
@@ -242,15 +242,15 @@ export default function PlayerDetail() {
         )}
         {placementCounts.length > 1 && (
           <Section title="Where they finish" hint={`Out of ${player.gamesPlayed} finished games.`}>
-            <div className="card-elevated flex h-[13.5rem] items-end gap-3 rounded-2xl bg-parchment-panel p-4 dark:bg-ink-panel">
+            <div className="card-elevated flex h-[13.5rem] items-end gap-3 rounded-2xl bg-surface p-4">
               {Array.from(placementCounts, (c) => c ?? 0).map((count, i) => (
                 <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-                  <span className="font-display text-xl font-bold tabular-nums text-ink dark:text-cream">{count}</span>
+                  <span className="font-display text-xl font-bold tabular-nums text-fg">{count}</span>
                   <div
-                    className={`w-full rounded-t-lg ${i === 0 ? 'bg-gold' : 'bg-muted/25 dark:bg-muted-dark/25'}`}
+                    className={`w-full rounded-t-lg ${i === 0 ? 'bg-gold' : 'bg-fg-soft/25'}`}
                     style={{ height: `${Math.max(6, (count / maxPlacementCount) * 120)}px` }}
                   />
-                  <span className="text-xs font-semibold text-muted dark:text-muted-dark">{ordinal(i + 1)}</span>
+                  <span className="text-xs font-semibold text-fg-soft">{ordinal(i + 1)}</span>
                 </div>
               ))}
             </div>
@@ -265,19 +265,19 @@ export default function PlayerDetail() {
         >
           <ul className="grid gap-2 sm:grid-cols-2">
             {rivals.map((r) => {
-              const tone = r.mine > r.theirs ? 'text-club' : r.mine < r.theirs ? 'text-heart' : 'text-muted dark:text-muted-dark';
+              const tone = r.mine > r.theirs ? 'text-club' : r.mine < r.theirs ? 'text-heart' : 'text-fg-soft';
               const verdict = r.mine > r.theirs ? 'Leads' : r.mine < r.theirs ? 'Trails' : 'Even';
               return (
                 <li key={r.opponent}>
                   <NavLink
                     to={`/stats/${encodeURIComponent(r.opponent)}`}
                     viewTransition
-                    className="card-elevated press flex items-center gap-3 rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel"
+                    className="card-elevated press flex items-center gap-3 rounded-2xl bg-surface p-3"
                   >
                     <Avatar name={r.opponent} sizeClass="h-10 w-10 text-sm" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold text-ink dark:text-cream">{r.opponent}</span>
-                      <span className="text-xs text-muted dark:text-muted-dark">
+                      <span className="block truncate font-semibold text-fg">{r.opponent}</span>
+                      <span className="text-xs text-fg-soft">
                         {r.games} {r.games === 1 ? 'game' : 'games'} together
                       </span>
                     </span>
@@ -306,23 +306,23 @@ export default function PlayerDetail() {
       )}
 
       <Section title="Game log" hint="Newest first. Tap a game to open it.">
-        <ul className="card-elevated divide-y divide-parchment-line rounded-2xl bg-parchment-panel dark:divide-ink-line dark:bg-ink-panel">
+        <ul className="card-elevated divide-y divide-line rounded-2xl bg-surface">
           {player.history.map((g) => (
             <li key={g.gameId}>
               <NavLink to={`/history/${g.gameId}`} viewTransition className="press flex items-center gap-3 px-4 py-3">
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-bold ${g.won ? 'bg-gold text-ink' : 'bg-muted/10 text-muted dark:bg-muted-dark/10 dark:text-muted-dark'}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-bold ${g.won ? 'bg-gold text-on-accent' : 'bg-surface-sunk text-fg-soft'}`}
                   title={g.won ? 'Won' : `Finished ${ordinal(g.placement)}`}
                 >
                   {g.won ? <Crown size={16} fill="currentColor" /> : ordinal(g.placement)}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-ink dark:text-cream">
+                  <span className="block truncate text-sm font-semibold text-fg">
                     With {g.opponentNames.join(', ') || 'nobody'}
                   </span>
-                  <span className="text-xs text-muted dark:text-muted-dark">{formatDate(g.createdAt, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span className="text-xs text-fg-soft">{formatDate(g.createdAt, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </span>
-                <span className={`font-display text-2xl font-bold tabular-nums ${g.won ? 'text-gold-deep dark:text-gold' : 'text-ink dark:text-cream'}`}>
+                <span className={`font-display text-2xl font-bold tabular-nums ${g.won ? 'text-gold-deep dark:text-gold' : 'text-fg'}`}>
                   {g.total}
                 </span>
               </NavLink>

@@ -32,12 +32,12 @@ export default function SeasonTimeline({ games, focus }) {
     : [];
 
   return (
-    <div className="card-elevated overflow-x-auto rounded-2xl bg-parchment-panel p-2 dark:bg-ink-panel">
+    <div className="card-elevated overflow-x-auto rounded-2xl bg-surface p-2">
       <svg viewBox={`0 0 ${W} ${H}`} style={{ minWidth: W }} className="w-full" role="img" aria-label="Final totals in every game">
         {[yMin, Math.round((yMin + yMax) / 2), yMax].map((t) => (
           <g key={t}>
-            <line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} className="stroke-parchment-line dark:stroke-ink-line" strokeDasharray="2 4" />
-            <text x={PAD.l - 6} y={y(t) + 3} textAnchor="end" className="fill-muted text-[9px] dark:fill-muted-dark">{t}</text>
+            <line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} className="stroke-line" strokeDasharray="2 4" />
+            <text x={PAD.l - 6} y={y(t) + 3} textAnchor="end" className="fill-fg-soft text-[9px]">{t}</text>
           </g>
         ))}
         {focusPoints.length > 1 && (
@@ -69,7 +69,7 @@ export default function SeasonTimeline({ games, focus }) {
                 </circle>
               );
             })}
-            <text x={x(i)} y={H - 10} textAnchor="middle" className="fill-muted text-[9px] font-semibold dark:fill-muted-dark">
+            <text x={x(i)} y={H - 10} textAnchor="middle" className="fill-fg-soft text-[9px] font-semibold">
               {formatDate(s.game.createdAt, { month: 'short', day: 'numeric' })}
             </text>
           </g>

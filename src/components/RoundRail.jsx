@@ -2,9 +2,10 @@ import { TOTAL_ROUNDS } from '../lib/fiveCrowns.js';
 
 const RANK_INDEX = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-// The whole game as a row of 11 mini cards: played rounds are face-up gold
-// (tap to edit), the current round is raised, the rest wait face-down.
-export default function RoundRail({ rounds, currentRound, complete = false, onSelect }) {
+// The whole game as a row of 11 mini cards: played rounds are filled in (tap
+// to edit), the current round is solid, the rest wait. onBlock: drawn on top
+// of the colored round header, so it uses translucent white/black tones.
+export default function RoundRail({ rounds, currentRound, complete = false, onSelect, onBlock = false }) {
   const played = new Set(rounds.map((r) => r.roundNumber));
 
   return (
@@ -12,12 +13,18 @@ export default function RoundRail({ rounds, currentRound, complete = false, onSe
       {Array.from({ length: TOTAL_ROUNDS }, (_, i) => i + 1).map((round) => {
         const isPlayed = played.has(round);
         const isCurrent = !complete && round === currentRound;
-        const base = 'flex aspect-[5/7] md:aspect-auto md:h-12 md:text-sm items-center justify-center rounded-md text-[11px] font-bold transition-all';
-        const look = isCurrent
-          ? 'bg-gold text-ink shadow-md shadow-gold/40 -translate-y-1 ring-2 ring-gold-bright animate-pulse-soft'
-          : isPlayed
-            ? 'bg-gold/20 text-gold-deep dark:text-gold-bright'
-            : 'bg-muted/10 text-muted/60 dark:bg-muted-dark/10 dark:text-muted-dark/50';
+        const base = 'flex h-10 items-center justify-center rounded-lg font-display text-sm font-bold md:h-12 md:text-base';
+        const look = onBlock
+          ? isCurrent
+            ? 'bg-white text-[#111318]'
+            : isPlayed
+              ? 'bg-black/20'
+              : 'bg-white/15 opacity-60'
+          : isCurrent
+            ? 'bg-fg text-canvas'
+            : isPlayed
+              ? 'bg-accent text-on-accent'
+              : 'bg-surface-sunk text-fg-soft';
         const label = RANK_INDEX[round - 1];
 
         if (isPlayed && onSelect) {

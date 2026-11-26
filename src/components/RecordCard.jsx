@@ -12,13 +12,13 @@ export default function RecordCard({ label, value, unit, who, note, gameId, crea
     <>
       <span className="absolute left-2.5 top-2 text-sm leading-none" style={{ color }} aria-hidden="true">{pip.symbol}</span>
       <span className="absolute bottom-2 right-2.5 rotate-180 text-sm leading-none" style={{ color }} aria-hidden="true">{pip.symbol}</span>
-      <span className="text-[13px] font-semibold text-muted">{label}</span>
+      <span className="text-[13px] font-semibold text-[#565c6b]">{label}</span>
       <span className="mt-1 font-display text-5xl font-bold leading-none" style={{ color }}>
         {value}
       </span>
-      {unit && <span className="mt-1 text-xs font-semibold text-muted">{unit}</span>}
-      <span className="mt-3 text-base font-bold text-ink">{who}</span>
-      <span className="text-xs text-muted">{[note, formatDate(createdAt)].filter(Boolean).join(', ')}</span>
+      {unit && <span className="mt-1 text-xs font-semibold text-[#565c6b]">{unit}</span>}
+      <span className="mt-3 text-base font-bold text-[#111318]">{who}</span>
+      <span className="text-xs text-[#565c6b]">{[note, formatDate(createdAt)].filter(Boolean).join(', ')}</span>
     </>
   );
   const className =

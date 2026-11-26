@@ -22,6 +22,7 @@ import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
 import { CURRENT_GAME_KEY } from '../lib/storageKeys.js';
+import { colorVar, onColor, suitForIndex } from '../lib/suits.js';
 
 export default function Play({ forceNew = false }) {
   const { gameId: paramGameId } = useParams();
@@ -127,14 +128,14 @@ function NewGameForm() {
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-4 md:p-8">
       <header>
-        <h1 className="font-display text-4xl font-bold text-ink md:text-5xl dark:text-cream">Who's playing?</h1>
-        <p className="mt-2 text-muted dark:text-muted-dark">Tap faces to seat them. Seat 1 deals the first round.</p>
+        <h1 className="font-display text-4xl font-bold text-fg md:text-5xl">Who's playing?</h1>
+        <p className="mt-2 text-fg-soft">Tap faces to seat them. Seat 1 deals the first round.</p>
       </header>
 
       {recentPlayers === undefined ? (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5" aria-hidden="true">
           {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl bg-muted/10 dark:bg-muted-dark/10" />
+            <div key={i} className="h-32 animate-pulse rounded-2xl bg-surface-sunk" />
           ))}
         </div>
       ) : recentPlayers.length > 0 ? (
@@ -152,19 +153,19 @@ function NewGameForm() {
                 className={[
                   'press relative flex flex-col items-center gap-2 rounded-2xl border-2 px-2 pb-3 pt-4 transition-colors disabled:opacity-40',
                   seated
-                    ? 'border-gold bg-gold/10'
-                    : 'border-transparent bg-parchment-panel dark:bg-ink-panel',
+                    ? 'border-fg bg-surface'
+                    : 'border-transparent bg-surface',
                 ].join(' ')}
               >
                 {seated && (
-                  <span className="animate-pop-in absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-xs font-bold text-ink">
+                  <span className="animate-pop-in absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-fg text-canvas text-xs font-bold">
                     {seat + 1}
                   </span>
                 )}
                 <Avatar name={r.name} sizeClass="h-16 w-16 text-2xl" />
-                <span className="w-full truncate text-center font-semibold text-ink dark:text-cream">{r.name}</span>
+                <span className="w-full truncate text-center font-semibold text-fg">{r.name}</span>
                 {r.lastUsedAt && (
-                  <span className="-mt-1.5 text-xs text-muted dark:text-muted-dark">{formatRelativeDate(r.lastUsedAt)}</span>
+                  <span className="-mt-1.5 text-xs text-fg-soft">{formatRelativeDate(r.lastUsedAt)}</span>
                 )}
               </button>
             );
@@ -173,9 +174,9 @@ function NewGameForm() {
       ) : null}
 
       <section>
-        <h2 className="mb-3 font-display text-2xl font-bold text-ink dark:text-cream">The table</h2>
+        <h2 className="mb-3 font-display text-2xl font-bold text-fg">The table</h2>
         {names.length === 0 && (
-          <p className="mb-3 rounded-2xl border-2 border-dashed border-parchment-line p-5 text-center text-muted dark:border-ink-line dark:text-muted-dark">
+          <p className="mb-3 rounded-2xl border-2 border-dashed border-line p-5 text-center text-fg-soft border-line">
             Nobody is seated yet.
           </p>
         )}
@@ -186,7 +187,7 @@ function NewGameForm() {
               {name.trim() ? (
                 <Avatar name={name} sizeClass="h-11 w-11 text-sm" />
               ) : (
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-parchment-line dark:border-ink-line" />
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-line" />
               )}
               <input
                 type="text"
@@ -196,14 +197,14 @@ function NewGameForm() {
                 placeholder="Name"
                 aria-label={`Seat ${i + 1} name`}
                 aria-invalid={duplicateIndexes.has(i)}
-                className={`card-elevated min-w-0 flex-1 rounded-2xl bg-parchment-panel p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-panel dark:text-cream ${duplicateIndexes.has(i) ? 'ring-2 ring-heart' : ''}`}
+                className={`card-elevated min-w-0 flex-1 rounded-2xl bg-surface p-3 font-bold text-fg placeholder:font-normal placeholder:text-fg-soft focus:outline-none ${duplicateIndexes.has(i) ? 'ring-2 ring-heart' : ''}`}
               />
               <button
                 type="button"
                 onClick={() => move(i, -1)}
                 disabled={i === 0}
                 aria-label={`Move seat ${i + 1} up`}
-                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-ink disabled:opacity-30 dark:bg-ink-panel dark:text-cream"
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface text-fg disabled:opacity-30"
               >
                 <ChevronUp size={18} />
               </button>
@@ -212,7 +213,7 @@ function NewGameForm() {
                 onClick={() => move(i, 1)}
                 disabled={i === names.length - 1}
                 aria-label={`Move seat ${i + 1} down`}
-                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-ink disabled:opacity-30 dark:bg-ink-panel dark:text-cream"
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface text-fg disabled:opacity-30"
               >
                 <ChevronDown size={18} />
               </button>
@@ -220,7 +221,7 @@ function NewGameForm() {
                 type="button"
                 onClick={() => removePlayer(i)}
                 aria-label={`Clear seat ${i + 1}`}
-                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-parchment-panel text-heart dark:bg-ink-panel"
+                className="press card-elevated flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface text-heart"
               >
                 <X size={18} />
               </button>
@@ -231,7 +232,7 @@ function NewGameForm() {
           type="button"
           onClick={() => addPlayer()}
           disabled={tableFull}
-          className="press mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-3 font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
+          className="press mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-line py-3 font-semibold text-fg-soft disabled:opacity-30 border-line"
         >
           <Plus size={18} />
           {tableFull ? `The table is full (${MAX_PLAYERS} players)` : 'Add someone new'}
@@ -247,22 +248,22 @@ function NewGameForm() {
           type="button"
           onClick={() => handleStart()}
           disabled={!canStart || starting}
-          className="press w-full rounded-2xl bg-gold py-4 font-display text-2xl font-bold text-ink shadow-lg shadow-gold/20 disabled:opacity-40"
+          className="press w-full rounded-2xl bg-fg py-4 font-display text-2xl font-bold text-canvas disabled:opacity-40"
         >
           {starting ? 'Dealing…' : 'Deal the first hand'}
         </button>
-        <p className="text-center text-sm text-muted dark:text-muted-dark">{startHint}</p>
+        <p className="text-center text-sm text-fg-soft">{startHint}</p>
         <button
           type="button"
           onClick={() => handleStart(true)}
           disabled={starting}
-          className="press flex w-full flex-col items-center gap-0.5 rounded-2xl border border-parchment-line py-3 text-ink disabled:opacity-40 dark:border-ink-line dark:text-cream"
+          className="press flex w-full flex-col items-center gap-0.5 rounded-2xl border border-line py-3 text-fg disabled:opacity-40 border-line"
         >
           <span className="flex items-center gap-1.5 font-semibold">
             <FlaskConical size={16} />
             Start a practice game
           </span>
-          <span className="text-xs text-muted dark:text-muted-dark">
+          <span className="text-xs text-fg-soft">
             Not saved to History or Stats. {canStart ? 'Uses the players seated.' : 'Uses 4 recent players.'}
           </span>
         </button>
@@ -334,7 +335,7 @@ function LiveGame({ gameId }) {
   if (game === null) {
     return (
       <div className="p-4 text-center">
-        <p className="mt-8 text-muted dark:text-muted-dark">This game no longer exists.</p>
+        <p className="mt-8 text-fg-soft">This game no longer exists.</p>
         <NavLink to="/play/new" className="mt-3 inline-block font-bold text-gold-deep dark:text-gold">
           Start a new game
         </NavLink>
@@ -347,6 +348,7 @@ function LiveGame({ gameId }) {
     ? game.rounds.find((r) => r.roundNumber === editingRound)?.scores
     : null;
   const dealer = dealerForRound(game.currentRound, game.players);
+  const roundSuit = suitForIndex(game.currentRound - 1).key;
   const editingDealer = editingRound ? dealerForRound(editingRound, game.players) : null;
   // The form reports a draft from mount, so only overlay it once something was entered.
   const hasDraft = !isComplete && draftRound && Object.values(draftRound.scores).some((e) => e.score > 0 || e.wentOut);
@@ -416,19 +418,19 @@ function LiveGame({ gameId }) {
   return (
     <div className="relative space-y-6 p-4 md:p-6">
       {practice && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-gold/50 bg-gold/10 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-dashed border-line bg-surface px-4 py-3">
           <FlaskConical size={18} className="shrink-0 text-gold-deep dark:text-gold" />
-          <p className="min-w-0 flex-1 text-sm text-ink dark:text-cream">
+          <p className="min-w-0 flex-1 text-sm text-fg">
             <span className="font-bold">Practice game.</span> Nothing here is saved to History or Stats.
           </p>
           <div className="flex gap-2">
             {!isComplete && (
-              <button type="button" onClick={dealRandomRound} disabled={dealing} className="press flex disabled:opacity-50 items-center gap-1.5 rounded-full bg-gold px-3 py-1.5 text-sm font-bold text-ink">
+              <button type="button" onClick={dealRandomRound} disabled={dealing} className="press flex disabled:opacity-50 items-center gap-1.5 rounded-full bg-fg px-4 py-2 text-sm font-bold text-canvas">
                 <Dices size={15} />
                 Deal random round
               </button>
             )}
-            <button type="button" onClick={handleEndPractice} className="press rounded-full border border-parchment-line px-3 py-1.5 text-sm font-semibold text-ink dark:border-ink-line dark:text-cream">
+            <button type="button" onClick={handleEndPractice} className="press rounded-full border border-line px-3 py-1.5 text-sm font-semibold text-fg border-line">
               End practice
             </button>
           </div>
@@ -441,7 +443,13 @@ function LiveGame({ gameId }) {
         </p>
       )}
 
-      <div data-round-header className={`card-elevated hero-sheen ${isComplete ? '' : 'sticky top-0'} z-10 relative overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-5 dark:border-gold/30 dark:bg-ink-panel`}>
+      {/* The round header is a solid block in this round's suit color, so the
+          whole screen visibly changes as the wild rank climbs. */}
+      <div
+        data-round-header
+        className={`${isComplete ? 'border-2 border-line bg-surface' : 'sticky top-0'} relative z-10 overflow-hidden rounded-3xl p-5 md:p-6`}
+        style={isComplete ? undefined : { background: colorVar(roundSuit), color: onColor(roundSuit) }}
+      >
         {isComplete && <ConfettiBurst />}
         <div className="relative flex items-start justify-between">
           {isComplete ? (
@@ -449,15 +457,20 @@ function LiveGame({ gameId }) {
               <WinnerReveal game={game} />
             </div>
           ) : (
-            <div className="flex min-w-0 flex-1 items-center gap-4">
+            <div className="flex min-w-0 flex-1 items-center gap-5">
               <PlayingCard key={game.currentRound} round={game.currentRound} />
               <div className="min-w-0">
-                <p className="font-display text-[2rem] font-bold leading-none text-ink md:text-6xl dark:text-cream">{wildRankWordForRound(game.currentRound)}</p>
-                <p className="mt-0.5 font-display text-lg italic text-gold-deep md:text-2xl dark:text-gold">are wild</p>
-                <p className="mt-2 flex items-center gap-1.5 text-sm text-muted dark:text-muted-dark">
-                  <Shuffle size={13} className="shrink-0" />
+                <p className="text-sm font-semibold opacity-80">
+                  Round {game.currentRound} of {TOTAL_ROUNDS}
+                </p>
+                <p className="font-display text-5xl font-extrabold leading-none tracking-tight md:text-7xl">
+                  {wildRankWordForRound(game.currentRound)}
+                </p>
+                <p className="font-display text-xl font-semibold opacity-85 md:text-2xl">are wild</p>
+                <p className="mt-3 flex items-center gap-1.5 text-base">
+                  <Shuffle size={15} className="shrink-0 opacity-80" />
                   <span className="truncate">
-                    <span className="font-bold text-ink dark:text-cream">{dealer.name}</span> deals {game.currentRound + 2} cards
+                    <span className="font-bold">{dealer.name}</span> deals {game.currentRound + 2} cards
                   </span>
                 </p>
               </div>
@@ -468,22 +481,22 @@ function LiveGame({ gameId }) {
               to="/play/new"
               aria-label="Start new game"
               title="Start new game"
-              className="press flex h-9 w-9 items-center justify-center rounded-full bg-muted/10 text-ink dark:bg-muted-dark/10 dark:text-cream"
+              className={`press flex h-11 w-11 items-center justify-center rounded-full ${isComplete ? 'bg-surface-sunk text-fg' : 'bg-black/15'}`}
             >
-              <Plus size={16} />
+              <Plus size={18} />
             </NavLink>
             {!practice && <button
               type="button"
               onClick={handleCopyLink}
-              className="press flex items-center gap-1.5 rounded-full bg-muted/10 px-3 py-1.5 text-xs font-bold text-ink dark:bg-muted-dark/10 dark:text-cream"
+              className={`press flex h-11 items-center gap-1.5 rounded-full px-4 text-sm font-bold ${isComplete ? 'bg-surface-sunk text-fg' : 'bg-black/15'}`}
             >
-              {copied ? <Check size={14} /> : <Share2 size={14} />}
+              {copied ? <Check size={15} /> : <Share2 size={15} />}
               {copied ? 'Copied!' : 'Share'}
             </button>}
           </div>
         </div>
         <div className="relative mt-4">
-          <RoundRail rounds={game.rounds} currentRound={game.currentRound} complete={isComplete} onSelect={setEditingRound} />
+          <RoundRail rounds={game.rounds} currentRound={game.currentRound} complete={isComplete} onSelect={setEditingRound} onBlock={!isComplete} />
         </div>
       </div>
 
@@ -491,8 +504,8 @@ function LiveGame({ gameId }) {
           keep the single-column order: standings, entry, race. */}
       <div className="space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
       <div className="md:col-start-1 md:row-start-1">
-        <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
-          <ListOrdered size={13} />
+        <p className="mb-3 flex items-center gap-2 font-display text-xl font-bold text-fg">
+          <ListOrdered size={18} />
           Standings
         </p>
         <PlayerTotals
@@ -500,7 +513,7 @@ function LiveGame({ gameId }) {
           rounds={game.rounds}
           winnerIds={isComplete ? game.winnerIds : []}
           complete={isComplete}
-          draftRound={isComplete ? null : draftRound}
+          draftRound={hasDraft ? draftRound : null}
           dealerRound={isComplete ? null : game.currentRound}
         />
         {!isComplete && (
@@ -509,7 +522,7 @@ function LiveGame({ gameId }) {
               type="button"
               onClick={() => setAddingPlayer(true)}
               disabled={game.players.length >= MAX_PLAYERS}
-              className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-2.5 text-sm font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
+              className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-line py-2.5 text-sm font-semibold text-fg-soft disabled:opacity-30 border-line"
             >
               <UserPlus size={16} />
               Add player
@@ -518,7 +531,7 @@ function LiveGame({ gameId }) {
               type="button"
               onClick={() => setRemovingOpen(true)}
               disabled={game.players.length <= MIN_PLAYERS}
-              className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-parchment-line py-2.5 text-sm font-semibold text-muted disabled:opacity-30 dark:border-ink-line dark:text-muted-dark"
+              className="press flex flex-1 items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-line py-2.5 text-sm font-semibold text-fg-soft disabled:opacity-30 border-line"
             >
               <UserMinus size={16} />
               Remove player
@@ -535,7 +548,7 @@ function LiveGame({ gameId }) {
 
       {!isComplete && (
         <div className="md:col-start-2 md:row-span-2 md:row-start-1">
-          <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">This round's scores</p>
+          <p className="mb-3 font-display text-xl font-bold text-fg">This round's scores</p>
           <ScoreEntryForm
             key={game.currentRound}
             players={game.players}
@@ -548,7 +561,7 @@ function LiveGame({ gameId }) {
             type="button"
             onClick={() => setConfirmingUndo(true)}
             disabled={game.rounds.length === 0}
-            className="press mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold text-muted disabled:opacity-30 dark:text-muted-dark"
+            className="press mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-bold text-fg-soft disabled:opacity-30"
           >
             <Undo2 size={15} />
             Undo last entry
@@ -558,41 +571,41 @@ function LiveGame({ gameId }) {
 
       {chartRounds.length > 0 && (
         <div className="md:col-start-1 md:row-start-2">
-          <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-muted dark:text-muted-dark">
-            <TrendingUp size={13} />
-            The race {hasDraft && <span className="font-normal">(live preview)</span>}
+          <p className="mb-3 flex items-center gap-2 font-display text-xl font-bold text-fg">
+            <TrendingUp size={18} />
+            The race {hasDraft && <span className="font-sans text-sm font-normal text-fg-soft">live preview</span>}
           </p>
-          <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
+          <div className="card-elevated rounded-2xl bg-surface p-3">
             <RaceChart players={game.players} rounds={chartRounds} />
-            <p className="mt-1 text-center text-[11px] text-muted dark:text-muted-dark">Lowest line wins</p>
+            <p className="mt-1 text-center text-[11px] text-fg-soft">Lowest line wins</p>
           </div>
         </div>
       )}
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-semibold text-muted dark:text-muted-dark">Scorecard (tap to edit)</p>
+        <p className="mb-3 font-display text-xl font-bold text-fg">Scorecard (tap to edit)</p>
         <ScorecardGrid players={game.players} rounds={game.rounds} onEditRound={setEditingRound} />
       </div>
 
       {addingPlayer && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="card-elevated animate-pop-in w-full max-w-sm rounded-t-3xl bg-parchment-panel p-5 dark:bg-ink-panel sm:rounded-3xl">
-            <h2 className="mb-3 font-display text-xl text-ink dark:text-cream">Add player</h2>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="card-elevated animate-pop-in w-full max-w-sm rounded-t-3xl bg-surface p-5 sm:rounded-3xl">
+            <h2 className="mb-3 font-display text-xl text-fg">Add player</h2>
             <input
               type="text"
               autoFocus
               value={newPlayerName}
               onChange={(e) => setNewPlayerName(e.target.value)}
               placeholder="Player name"
-              className="card-elevated w-full rounded-2xl bg-parchment p-3 font-bold text-ink placeholder:font-normal placeholder:text-muted focus:outline-none dark:bg-ink-deep dark:text-cream"
+              className="card-elevated w-full rounded-2xl bg-canvas p-3 font-bold text-fg placeholder:font-normal placeholder:text-fg-soft focus:outline-none"
             />
             {game.rounds.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm font-semibold text-ink dark:text-cream">
+                <p className="text-sm font-semibold text-fg">
                   Score for the {game.rounds.length} {game.rounds.length === 1 ? 'round' : 'rounds'} they missed
                 </p>
-                <div className="mt-2 grid grid-cols-3 gap-1 rounded-xl bg-muted/10 p-1 dark:bg-muted-dark/10" role="group">
+                <div className="mt-2 grid grid-cols-3 gap-1 rounded-xl bg-surface-sunk p-1" role="group">
                   {[
                     { key: 'highest', label: 'Highest' },
                     { key: 'average', label: 'Average' },
@@ -603,18 +616,18 @@ function LiveGame({ gameId }) {
                       type="button"
                       onClick={() => setJoinFill(opt.key)}
                       aria-pressed={joinFill === opt.key}
-                      className={`press rounded-lg py-2 text-sm font-semibold ${joinFill === opt.key ? 'bg-gold text-ink' : 'text-muted dark:text-muted-dark'}`}
+                      className={`press rounded-lg py-2 text-sm font-semibold ${joinFill === opt.key ? 'bg-fg text-canvas' : 'text-fg-soft'}`}
                     >
                       {opt.label}
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-xs text-muted dark:text-muted-dark">
+                <p className="mt-2 text-xs text-fg-soft">
                   {joinFill === 'highest' && 'Fairest. They take the worst hand at the table each round, so joining late never helps.'}
                   {joinFill === 'average' && 'Middle ground. They take the rounded average of everyone else each round.'}
                   {joinFill === 'zero' && 'No penalty. Lowest score wins, so this gives them a head start.'}
                 </p>
-                <p className="mt-1 text-xs font-semibold text-ink dark:text-cream">
+                <p className="mt-1 text-xs font-semibold text-fg">
                   They'd start on {game.rounds.reduce((sum, r) => sum + missedRoundScore(r, game.players, joinFill), 0)} points.
                 </p>
               </div>
@@ -624,7 +637,7 @@ function LiveGame({ gameId }) {
               <button
                 type="button"
                 onClick={closeAddPlayer}
-                className="press flex-1 rounded-xl border border-parchment-line py-3 font-semibold text-ink dark:border-ink-line dark:text-cream"
+                className="press flex-1 rounded-xl border border-line py-3 font-semibold text-fg border-line"
               >
                 Cancel
               </button>
@@ -632,7 +645,7 @@ function LiveGame({ gameId }) {
                 type="button"
                 onClick={handleAddPlayer}
                 disabled={!newPlayerName.trim()}
-                className="press flex-1 rounded-xl bg-gold py-3 font-bold text-ink disabled:opacity-40"
+                className="press flex-1 rounded-xl bg-fg py-3 font-bold text-canvas disabled:opacity-40"
               >
                 Add
               </button>
@@ -642,11 +655,11 @@ function LiveGame({ gameId }) {
       )}
 
       {editingRound && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="card-elevated animate-pop-in max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-parchment-panel p-5 dark:bg-ink-panel sm:rounded-3xl">
-            <h2 className="mb-3 flex flex-wrap items-center gap-x-2 text-lg font-bold text-ink dark:text-cream">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="card-elevated animate-pop-in max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-3xl bg-surface p-5 sm:rounded-3xl">
+            <h2 className="mb-3 flex flex-wrap items-center gap-x-2 text-lg font-bold text-fg">
               <span className="font-display text-xl">Edit {wildRankWordForRound(editingRound)}</span>
-              <span className="flex items-center gap-1 text-sm font-bold text-muted dark:text-muted-dark">
+              <span className="flex items-center gap-1 text-sm font-bold text-fg-soft">
                 <Shuffle size={12} />
                 Dealer: {editingDealer.name}
               </span>
@@ -668,10 +681,10 @@ function LiveGame({ gameId }) {
       )}
 
       {removingOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink-deep/70 backdrop-blur-sm sm:items-center sm:p-4" onClick={() => setRemovingOpen(false)}>
-          <div className="card-elevated animate-sheet-up w-full max-w-sm rounded-t-3xl bg-parchment-panel p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] dark:bg-ink-panel sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="font-display text-2xl text-ink dark:text-cream">Who's leaving?</h2>
-            <p className="mt-1 text-sm text-muted dark:text-muted-dark">Their scores in this game are deleted, so it won't count in their stats.</p>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4" onClick={() => setRemovingOpen(false)}>
+          <div className="card-elevated animate-sheet-up w-full max-w-sm rounded-t-3xl bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="font-display text-2xl text-fg">Who's leaving?</h2>
+            <p className="mt-1 text-sm text-fg-soft">Their scores in this game are deleted, so it won't count in their stats.</p>
             <ul className="mt-4 space-y-2">
               {game.players.map((p) => (
                 <li key={p.id}>
@@ -681,7 +694,7 @@ function LiveGame({ gameId }) {
                       setRemoveError(null);
                       setRemovingPlayer(p);
                     }}
-                    className="press flex w-full items-center gap-3 rounded-2xl border border-parchment-line p-3 text-left font-semibold text-ink dark:border-ink-line dark:text-cream"
+                    className="press flex w-full items-center gap-3 rounded-2xl border border-line p-3 text-left font-semibold text-fg border-line"
                   >
                     <Avatar name={p.name} sizeClass="h-9 w-9 text-sm" />
                     <span className="flex-1 truncate">{p.name}</span>
@@ -691,7 +704,7 @@ function LiveGame({ gameId }) {
               ))}
             </ul>
             {removeError && <p className="mt-3 text-sm font-bold text-heart">{removeError}</p>}
-            <button type="button" onClick={() => setRemovingOpen(false)} className="press mt-4 w-full rounded-xl border border-parchment-line py-3 font-semibold text-ink dark:border-ink-line dark:text-cream">
+            <button type="button" onClick={() => setRemovingOpen(false)} className="press mt-4 w-full rounded-xl border border-line py-3 font-semibold text-fg border-line">
               Cancel
             </button>
           </div>

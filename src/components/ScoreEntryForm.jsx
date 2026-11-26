@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Delete } from 'lucide-react';
 import Avatar from './Avatar.jsx';
 import HandCounter from './HandCounter.jsx';
+import { seatColors } from '../lib/suits.js';
 
 const MAX_DIGITS = 3;
 
@@ -21,7 +22,7 @@ function initialEntries(players, initialData) {
 // iPad keyboard can never open: there is nothing for iOS to focus. Docked to
 // the bottom of the screen like a keyboard on the live game, inline inside
 // the Edit round sheet.
-function ScorePad({ player, value, wentOut, roundNumber, isLast, docked, onDigit, onBackspace, onClear, onToggleOut, onUse, onNext, onClose }) {
+function ScorePad({ player, color, value, wentOut, roundNumber, isLast, docked, onDigit, onBackspace, onClear, onToggleOut, onUse, onNext, onClose }) {
   const [mode, setMode] = useState('number');
 
   return (
@@ -37,7 +38,7 @@ function ScorePad({ player, value, wentOut, roundNumber, isLast, docked, onDigit
     >
       <div className="mx-auto max-w-xl">
         <div className="mb-2.5 flex items-center gap-3">
-          <Avatar name={player.name} sizeClass="h-9 w-9 text-sm" />
+          <Avatar name={player.name} color={color} sizeClass="h-9 w-9 text-sm" />
           <span className="min-w-0 flex-1 truncate font-display text-lg font-bold text-fg">{player.name}</span>
           <span className={`min-w-14 rounded-lg px-2 text-right font-display text-3xl font-bold tabular-nums ${wentOut ? 'text-club' : 'text-fg'}`}>
             {wentOut ? 'Out' : value || '0'}
@@ -119,6 +120,7 @@ export default function ScoreEntryForm({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const rowRefs = useRef({});
+  const colors = seatColors(players);
 
   // A player can join mid-game, which adds them to `players` without
   // remounting this form (same round, same key). `entries` state won't have
@@ -284,7 +286,7 @@ export default function ScoreEntryForm({
             }}
             className={`flex min-h-16 items-center gap-3 rounded-2xl border-2 bg-surface p-2.5 transition-colors ${isActive ? 'border-fg' : 'border-transparent'}`}
           >
-            <Avatar name={p.name} sizeClass="h-10 w-10 text-sm" />
+            <Avatar name={p.name} color={colors[p.id]} sizeClass="h-10 w-10 text-sm" />
             <span className="min-w-0 flex-1 truncate text-lg font-semibold text-fg">{p.name}</span>
             <button
               type="button"
@@ -339,6 +341,7 @@ export default function ScoreEntryForm({
           {docked && <div aria-hidden="true" className="h-[22rem]" />}
           <ScorePad
             player={active}
+            color={colors[active.id]}
             value={safeEntries[active.id].score}
             wentOut={safeEntries[active.id].wentOut}
             roundNumber={roundNumber}

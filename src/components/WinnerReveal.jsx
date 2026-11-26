@@ -20,13 +20,13 @@ export default function WinnerReveal({ game }) {
               <Crown
                 size={34}
                 fill="currentColor"
-                className="animate-crown-drop absolute -top-7 left-1/2 text-gold drop-shadow-[0_2px_6px_rgba(212,169,74,0.6)]"
+                className="animate-crown-drop absolute -top-7 left-1/2 text-gold"
                 style={{ animationDelay: `${300 + i * 150}ms` }}
               />
               <Avatar name={w.name} sizeClass="h-20 w-20 text-3xl ring-4 ring-gold rounded-full" className="animate-pop-in" />
             </div>
-            <p className="mt-3 font-display text-2xl text-ink dark:text-cream">{w.name}</p>
-            <p className="text-sm font-bold text-muted dark:text-muted-dark">{totals[w.id]} points</p>
+            <p className="mt-3 font-display text-2xl text-fg">{w.name}</p>
+            <p className="text-sm font-bold text-fg-soft">{totals[w.id]} points</p>
           </div>
         ))}
       </div>

@@ -43,10 +43,10 @@ export default function PlayerTable({ players, focus }) {
   );
 
   return (
-    <div className="card-elevated overflow-x-auto rounded-2xl bg-parchment-panel dark:bg-ink-panel">
+    <div className="card-elevated overflow-x-auto rounded-2xl bg-surface">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-parchment-line text-muted dark:border-ink-line dark:text-muted-dark">
+          <tr className="border-b border-line text-fg-soft border-line">
             <th className="px-3 py-3 text-left font-semibold">Player</th>
             {COLUMNS.map((c) => (
               <th key={c.key} className={`px-2 py-1 text-right font-semibold ${c.wide ? 'hidden md:table-cell' : ''}`}>
@@ -71,15 +71,15 @@ export default function PlayerTable({ players, focus }) {
                 key={key}
                 onClick={() => navigate(`/stats/${encodeURIComponent(p.name)}`, { viewTransition: true })}
                 className={[
-                  'cursor-pointer border-b border-parchment-line/60 transition-colors last:border-0 hover:bg-gold/5 dark:border-ink-line/60',
-                  focus === key ? 'bg-gold/10' : '',
+                  'cursor-pointer border-b border-line transition-colors last:border-0 hover:bg-surface-sunk border-line/60',
+                  focus === key ? 'bg-surface-sunk' : '',
                   focus && focus !== key ? 'opacity-50' : '',
                 ].join(' ')}
               >
                 <td className="px-3 py-2.5">
                   <span className="flex items-center gap-2.5">
                     <Avatar name={p.name} sizeClass="h-8 w-8 text-xs" />
-                    <span className="truncate font-semibold text-ink dark:text-cream">{p.name}</span>
+                    <span className="truncate font-semibold text-fg">{p.name}</span>
                     {p.currentStreak >= 2 && (
                       <span title={`${p.currentStreak} wins in a row`} className="flex items-center text-xs font-bold text-heart">
                         <Flame size={13} fill="currentColor" />
@@ -94,7 +94,7 @@ export default function PlayerTable({ players, focus }) {
                   return (
                     <td
                       key={c.key}
-                      className={`px-3 py-2.5 text-right tabular-nums ${c.wide ? 'hidden md:table-cell' : ''} ${isBest ? 'font-bold text-gold-deep dark:text-gold' : 'text-ink dark:text-cream'}`}
+                      className={`px-3 py-2.5 text-right tabular-nums ${c.wide ? 'hidden md:table-cell' : ''} ${isBest ? 'font-bold text-gold-deep dark:text-gold' : 'text-fg'}`}
                     >
                       {c.format ? c.format(v) : v}
                     </td>
@@ -106,7 +106,7 @@ export default function PlayerTable({ players, focus }) {
                       <span
                         key={g.gameId}
                         title={g.won ? 'Won' : `Finished #${g.placement}`}
-                        className={`flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold ${g.won ? 'bg-gold text-ink' : 'bg-muted/10 text-muted dark:bg-muted-dark/10 dark:text-muted-dark'}`}
+                        className={`flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold ${g.won ? 'bg-gold text-on-accent' : 'bg-surface-sunk text-fg-soft'}`}
                       >
                         {g.won ? '♛' : g.placement}
                       </span>

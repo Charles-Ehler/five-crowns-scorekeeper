@@ -44,10 +44,10 @@ function Replay({ game }) {
 
   return (
     <div className="space-y-4 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
-      <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
+      <div className="card-elevated rounded-2xl bg-surface p-3">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-semibold text-muted dark:text-muted-dark">Replay</p>
-          <p className="text-xs font-bold text-ink dark:text-cream">
+          <p className="text-sm font-semibold text-fg-soft">Replay</p>
+          <p className="text-xs font-bold text-fg">
             {round === 0 ? 'Before the deal' : `After ${wildRankWordForRound(round)}, round ${round}`}
           </p>
         </div>
@@ -57,7 +57,7 @@ function Replay({ game }) {
             type="button"
             onClick={togglePlay}
             aria-label={playing ? 'Pause replay' : 'Play replay'}
-            className="press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-ink shadow-md shadow-gold/30"
+            className="press flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-fg text-canvas"
           >
             {playing ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
           </button>
@@ -108,7 +108,7 @@ export default function GameDetail() {
   if (game === null) {
     return (
       <div className="p-4 text-center">
-        <p className="mt-8 text-muted dark:text-muted-dark">This game no longer exists.</p>
+        <p className="mt-8 text-fg-soft">This game no longer exists.</p>
         <NavLink to="/history" className="mt-3 inline-block font-bold text-gold-deep dark:text-gold">
           Back to history
         </NavLink>
@@ -122,7 +122,7 @@ export default function GameDetail() {
 
   return (
     <div className="space-y-4 p-4 md:p-6">
-      <NavLink to="/history" viewTransition className="inline-flex items-center gap-1 text-sm font-bold text-ink dark:text-cream">
+      <NavLink to="/history" viewTransition className="inline-flex items-center gap-1 text-sm font-bold text-fg">
         <ArrowLeft size={16} />
         Back to history
       </NavLink>
@@ -135,18 +135,18 @@ export default function GameDetail() {
               <Avatar name={winnerNames[0]} sizeClass="h-16 w-16 text-2xl rounded-full ring-2 ring-gold" />
             </span>
             <div className="min-w-0">
-              <h1 className="font-display text-4xl font-bold leading-tight text-ink dark:text-cream">
+              <h1 className="font-display text-4xl font-bold leading-tight text-fg">
                 {winnerNames.length > 1 ? `${winnerNames.join(' & ')} tied` : `${winnerNames[0]} won`}
               </h1>
-              <p className="text-muted dark:text-muted-dark">
+              <p className="text-fg-soft">
                 {margin !== null ? `By ${margin} ${margin === 1 ? 'point' : 'points'}` : 'A shared crown'}, {formatDate(game.createdAt, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}.
               </p>
             </div>
           </div>
         ) : (
           <div className="min-w-0">
-            <h1 className="font-display text-4xl font-bold leading-tight text-ink dark:text-cream">Still being played</h1>
-            <p className="text-muted dark:text-muted-dark">
+            <h1 className="font-display text-4xl font-bold leading-tight text-fg">Still being played</h1>
+            <p className="text-fg-soft">
               Round {game.currentRound} of {TOTAL_ROUNDS}, {wildRankWordForRound(game.currentRound)} are wild.
             </p>
           </div>
@@ -155,7 +155,7 @@ export default function GameDetail() {
       {!isComplete && (
         <NavLink
           to={`/play/${game.id}`}
-          className="press flex w-full items-center justify-center gap-1.5 rounded-2xl bg-gold py-3 font-display text-base text-ink shadow-lg shadow-gold/20"
+          className="press flex w-full items-center justify-center gap-1.5 rounded-2xl bg-fg py-3 font-display text-base font-bold text-canvas"
         >
           <Swords size={18} />
           Continue game
@@ -167,7 +167,7 @@ export default function GameDetail() {
         <PlayerTotals players={game.players} rounds={game.rounds} dealerRound={game.currentRound} />
       )}
       <section>
-        <h2 className="mb-3 font-display text-2xl font-bold text-ink dark:text-cream">Scorecard</h2>
+        <h2 className="mb-3 font-display text-2xl font-bold text-fg">Scorecard</h2>
         <ScorecardGrid players={game.players} rounds={game.rounds} />
       </section>
 
@@ -177,7 +177,7 @@ export default function GameDetail() {
         <button
           type="button"
           onClick={() => setConfirmingDelete(true)}
-          className="press inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-muted hover:bg-heart/10 hover:text-heart dark:text-muted-dark"
+          className="press inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-fg-soft hover:bg-heart/10 hover:text-heart"
         >
           <Trash2 size={14} />
           Delete this game

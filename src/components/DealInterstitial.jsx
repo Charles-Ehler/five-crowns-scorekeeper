@@ -20,17 +20,17 @@ export default function DealInterstitial({ round, dealerName, onDone }) {
       type="button"
       onClick={onDone}
       aria-label="Continue"
-      className="animate-deal-backdrop fixed inset-0 z-[60] flex flex-col items-center justify-center bg-ink-deep/90 px-6 text-center backdrop-blur-md"
+      className="animate-deal-backdrop fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 px-6 text-center backdrop-blur-md"
     >
       <div className="animate-deal-card">
         <PlayingCard round={round} size="lg" />
       </div>
-      <p className="animate-deal-text mt-8 font-display text-5xl font-bold text-cream">{wildRankWordForRound(round)}</p>
-      <p className="animate-deal-text mt-1 font-display text-2xl italic text-gold" style={{ animationDelay: '520ms' }}>
+      <p className="animate-deal-text mt-8 font-display text-5xl font-bold text-white">{wildRankWordForRound(round)}</p>
+      <p className="animate-deal-text mt-1 font-display text-2xl font-semibold text-gold" style={{ animationDelay: '520ms' }}>
         are wild
       </p>
-      <p className="animate-deal-text mt-6 text-base text-muted-dark" style={{ animationDelay: '700ms' }}>
-        <span className="font-bold text-cream">{dealerName}</span> deals {cardsDealtForRound(round)} cards
+      <p className="animate-deal-text mt-6 text-base text-white/70" style={{ animationDelay: '700ms' }}>
+        <span className="font-bold text-white">{dealerName}</span> deals {cardsDealtForRound(round)} cards
       </p>
     </button>
   );

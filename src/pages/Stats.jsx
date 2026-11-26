@@ -35,8 +35,8 @@ function Section({ title, hint, children, className = '' }) {
   return (
     <section className={className}>
       <div className="mb-3">
-        <h2 className="font-display text-2xl font-bold text-ink dark:text-cream">{title}</h2>
-        {hint && <p className="text-sm text-muted dark:text-muted-dark">{hint}</p>}
+        <h2 className="font-display text-2xl font-bold text-fg">{title}</h2>
+        {hint && <p className="text-sm text-fg-soft">{hint}</p>}
       </div>
       {children}
     </section>
@@ -138,19 +138,19 @@ export default function Stats() {
     <div className="space-y-10 p-4 md:p-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-display text-4xl font-bold leading-tight text-ink md:text-5xl dark:text-cream">{headline}</h1>
-          <p className="mt-2 text-muted dark:text-muted-dark">
+          <h1 className="font-display text-4xl font-bold leading-tight text-fg md:text-5xl">{headline}</h1>
+          <p className="mt-2 text-fg-soft">
             {stats.totalGames} {stats.totalGames === 1 ? 'game' : 'games'} played since {formatDate(completed[0].createdAt)}. Last game {formatRelativeDate(last.createdAt)}.
           </p>
         </div>
-        <div className="flex rounded-full bg-muted/10 p-1 text-sm font-semibold dark:bg-muted-dark/10" role="group" aria-label="Which players to show">
+        <div className="flex rounded-full bg-surface-sunk p-1 text-sm font-semibold" role="group" aria-label="Which players to show">
           {['regulars', 'everyone'].map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => changeScope(s)}
               aria-pressed={scope === s}
-              className={`press rounded-full px-4 py-1.5 ${scope === s ? 'bg-gold text-ink' : 'text-muted dark:text-muted-dark'}`}
+              className={`press rounded-full px-4 py-1.5 ${scope === s ? 'bg-fg text-canvas' : 'text-fg-soft'}`}
             >
               {s === 'regulars' ? 'Regulars' : 'Everyone'}
             </button>
@@ -159,9 +159,9 @@ export default function Stats() {
       </header>
 
       <div className="grid gap-6 md:grid-cols-[1.4fr_1fr] md:items-stretch">
-        <section className="card-elevated rounded-3xl bg-parchment-panel p-4 dark:bg-ink-panel">
-          <h2 className="mb-1 px-2 font-display text-2xl font-bold text-ink dark:text-cream">Crowns won</h2>
-          <p className="mb-3 px-2 text-sm text-muted dark:text-muted-dark">
+        <section className="card-elevated rounded-3xl bg-surface p-4">
+          <h2 className="mb-1 px-2 font-display text-2xl font-bold text-fg">Crowns won</h2>
+          <p className="mb-3 px-2 text-sm text-fg-soft">
             Tap a player to follow them through the page.
             {hiddenCount > 0 && ` ${hiddenCount} one-time ${hiddenCount === 1 ? 'player is' : 'players are'} hidden.`}
           </p>
@@ -171,29 +171,29 @@ export default function Stats() {
         <NavLink
           to={`/history/${last.id}`}
           viewTransition
-          className="press hero-sheen relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border-2 border-gold/40 bg-parchment-panel p-6 text-center dark:bg-ink-panel"
+          className="press relative flex flex-col items-center justify-center overflow-hidden rounded-3xl bg-accent p-6 text-center text-on-accent"
         >
-          <p className="text-sm font-semibold text-gold-deep dark:text-gold">{champs.length > 1 ? 'Reigning champions' : 'Reigning champion'}</p>
+          <p className="text-sm font-bold opacity-75">{champs.length > 1 ? 'Reigning champions' : 'Reigning champion'}</p>
           <div className="mt-8 flex justify-center gap-4">
             {champs.map((name, i) => (
               <span key={name} className="relative">
                 <Crown
                   size={32}
                   fill="currentColor"
-                  className="animate-crown-drop absolute -top-7 left-1/2 text-gold"
+                  className="animate-crown-drop absolute -top-7 left-1/2 text-on-accent"
                   style={{ animationDelay: `${300 + i * 150}ms` }}
                 />
-                <Avatar name={name} sizeClass="h-24 w-24 text-4xl rounded-full ring-4 ring-gold" />
+                <Avatar name={name} sizeClass="h-24 w-24 text-4xl rounded-full ring-4 ring-white" />
               </span>
             ))}
           </div>
-          <p className="mt-4 font-display text-3xl font-bold text-ink dark:text-cream">{listNames(champs)}</p>
-          <p className="mt-1 text-sm text-muted dark:text-muted-dark">
+          <p className="mt-4 font-display text-4xl font-extrabold">{listNames(champs)}</p>
+          <p className="mt-1 text-sm font-medium opacity-80">
             Won on {formatDate(last.createdAt, { weekday: 'long', month: 'short', day: 'numeric' })}
             {lastSummary.margin !== null && ` by ${lastSummary.margin} points`}
           </p>
           {champs.length === 1 && champStat?.currentStreak >= 2 && (
-            <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-heart/15 px-3 py-1 text-sm font-bold text-heart">
+            <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-heart px-3 py-1 text-sm font-bold text-white">
               <Flame size={14} fill="currentColor" />
               {champStat.currentStreak} wins in a row
             </p>

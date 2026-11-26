@@ -31,12 +31,12 @@ export default function TrendChart({ name, history, average }) {
   const pick = games[selected] ?? games[games.length - 1];
 
   return (
-    <div className="card-elevated rounded-2xl bg-parchment-panel p-3 dark:bg-ink-panel">
+    <div className="card-elevated rounded-2xl bg-surface p-3">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full touch-none" role="img" aria-label={`${name}'s game totals over time`}>
         <line x1={PAD.l} x2={W - PAD.r} y1={y(average)} y2={y(average)} className="stroke-gold" strokeDasharray="4 4" opacity="0.7" />
         <text x={PAD.l - 6} y={y(average) + 3} textAnchor="end" className="fill-gold-deep text-[9px] font-bold dark:fill-gold">avg</text>
-        <text x={PAD.l - 6} y={PAD.t + 3} textAnchor="end" className="fill-muted text-[9px] dark:fill-muted-dark">{yMin}</text>
-        <text x={PAD.l - 6} y={H - PAD.b + 3} textAnchor="end" className="fill-muted text-[9px] dark:fill-muted-dark">{yMax}</text>
+        <text x={PAD.l - 6} y={PAD.t + 3} textAnchor="end" className="fill-fg-soft text-[9px]">{yMin}</text>
+        <text x={PAD.l - 6} y={H - PAD.b + 3} textAnchor="end" className="fill-fg-soft text-[9px]">{yMax}</text>
         <path d={d} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" className="race-line" />
         {games.map((g, i) => (
           <g key={g.gameId} onClick={() => setSelected(i)} className="cursor-pointer">
@@ -55,7 +55,7 @@ export default function TrendChart({ name, history, average }) {
         ))}
       </svg>
       <div className="mt-1 flex items-center justify-between text-sm">
-        <span className="text-muted dark:text-muted-dark">
+        <span className="text-fg-soft">
           {formatDate(pick.createdAt)}, {pick.won ? 'won' : `finished #${pick.placement}`}
         </span>
         <NavLink to={`/history/${pick.gameId}`} viewTransition className="font-bold text-gold-deep dark:text-gold">
