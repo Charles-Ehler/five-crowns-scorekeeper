@@ -365,3 +365,9 @@ button, a {
 .pad-key:disabled {
   opacity: 0.35;
 }
+
+/* reCAPTCHA (App Check) badge would cover the bottom tab bar. Hidden, with
+   Google's required notice shown on the New Game screen instead. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

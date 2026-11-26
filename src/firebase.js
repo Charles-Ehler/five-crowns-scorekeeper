@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -12,6 +13,20 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// App Check: every database and photo request carries a token proving it
+// came from this app on its own website (checked with invisible reCAPTCHA
+// v3). Off until VITE_FIREBASE_APPCHECK_SITE_KEY is set, and has no effect on
+// the backend until enforcement is turned on in the Firebase console.
+const appCheckSiteKey = import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY;
+export const appCheckEnabled = Boolean(appCheckSiteKey) && import.meta.env.VITE_USE_EMULATOR !== '1';
+if (appCheckEnabled) {
+  // On localhost, print a debug token in the browser console instead (it can
+  // be registered in the console so local testing keeps working).
+  if (import.meta.env.DEV) self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  initializeAppCheck(app, { provider: new ReCaptchaV3Provider(appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+}
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 

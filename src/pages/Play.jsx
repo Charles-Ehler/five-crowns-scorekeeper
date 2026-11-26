@@ -21,6 +21,7 @@ import { addPlayerToGame, createGame, endPracticeGame, isPracticeGame, removePla
 import { vibrate } from '../lib/haptics.js';
 import { formatRelativeDate } from '../lib/relativeDate.js';
 import { playGameComplete } from '../lib/sound.js';
+import { appCheckEnabled } from '../firebase.js';
 import { CURRENT_GAME_KEY } from '../lib/storageKeys.js';
 import { colorVar, onColor, suitForIndex } from '../lib/suits.js';
 
@@ -267,6 +268,13 @@ function NewGameForm() {
             Not saved to History or Stats. {canStart ? 'Uses the players seated.' : 'Uses 4 recent players.'}
           </span>
         </button>
+        {appCheckEnabled && (
+          <p className="pt-2 text-center text-xs text-fg-soft">
+            Protected by reCAPTCHA. The Google{' '}
+            <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and{' '}
+            <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
+          </p>
+        )}
       </div>
     </div>
   );
